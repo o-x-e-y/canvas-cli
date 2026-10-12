@@ -9,7 +9,7 @@ let
     ];
     text = ''
       COURSE_ID="12345"
-      MODULE_ID="333333"
+      MODULE_ID="222222"
       BASE_URL="https://fhict.instructure.com"
       API_KEY="$(cat /run/secrets/canvas-api-key)"
 
