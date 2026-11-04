@@ -1,27 +1,13 @@
 import json
 import os
 import subprocess
-from datetime import UTC, datetime
 from pathlib import Path
 
 from canvas_cli.api import get, get_all
+from canvas_cli.courses import current_courses, resolve
 
 STATE_HOME = os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state")
 STATE_PATH = Path(STATE_HOME, "canvas-feedback.json")
-
-
-def current_courses():
-    now = datetime.now(UTC).isoformat()
-    courses = get_all(
-        "/courses",
-        enrollment_type="student",
-        enrollment_state="active",
-        per_page=100,
-        **{"include[]": "term"},
-    )
-    return [
-        course for course in courses if ((course.get("term") or {}).get("end_at") or now) >= now
-    ]
 
 
 def assessment(submission):
@@ -47,8 +33,8 @@ def assessment(submission):
     return "\n".join(lines)
 
 
-def feedback(me):
-    for course in current_courses():
+def feedback(me, courses):
+    for course in courses:
         submissions = get_all(
             f"/courses/{course['id']}/students/submissions",
             per_page=100,
@@ -75,8 +61,13 @@ def feedback(me):
 
 
 def run(args):
+    if args.course:
+        course = resolve(args.course, "feedback")
+        courses = [{"id": course.id, "name": course.name}]
+    else:
+        courses = current_courses(enrollment_type="student")
     seen = set(json.loads(STATE_PATH.read_text())) if STATE_PATH.exists() else None
-    items = list(feedback(get("/users/self")["id"]))
+    items = list(feedback(get("/users/self")["id"], courses))
 
     if seen is None:
         print(f"First run: recorded {len(items)} existing items; later runs report what is new.")
@@ -89,4 +80,8 @@ def run(args):
                 subprocess.run(["notify-send", "--app-name=Canvas", title, body], check=False)
 
     STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    STATE_PATH.write_text(json.dumps(sorted(key for key, _, _ in items)))
+    keys = {key for key, _, _ in items}
+    if args.course and seen:
+        # Only one course was checked; keep what the others have seen
+        keys |= seen
+    STATE_PATH.write_text(json.dumps(sorted(keys)))

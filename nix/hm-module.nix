@@ -47,6 +47,54 @@ in
       '';
     };
 
+    courses = lib.mkOption {
+      type = lib.types.attrsOf (
+        lib.types.submodule {
+          options = {
+            id = lib.mkOption {
+              type = lib.types.int;
+              description = "The course id, as in its URL; `canvas courses` lists them.";
+            };
+            module = lib.mkOption {
+              type = lib.types.nullOr lib.types.int;
+              default = null;
+              description = ''
+                The module new assignments go into. Null means the course's first
+                module, so moving a module to the top is enough to switch.
+              '';
+            };
+            indent = lib.mkOption {
+              type = lib.types.nullOr lib.types.int;
+              default = null;
+              description = "Indent of new module items; null means 0.";
+            };
+          };
+        }
+      );
+      default = { };
+      example = lib.literalExpression ''
+        {
+          personal = { id = 12345; indent = 1; };
+          general.id = 23456;
+        }
+      '';
+      description = "Courses by nickname, for `-c <nickname>` and `defaults`.";
+    };
+
+    defaults = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = { };
+      example = {
+        assignment = "personal";
+        outcomes = "personal";
+        hand-in = "general";
+      };
+      description = ''
+        The course each subcommand uses without `-c`, by nickname. A subcommand
+        without one needs `-c`.
+      '';
+    };
+
     feedback = {
       enable = lib.mkEnableOption "a desktop notification for new feedback on your submissions";
 
@@ -63,8 +111,9 @@ in
 
     xdg.configFile."canvas/settings.json".text = builtins.toJSON (
       {
-        inherit (cfg) url;
+        inherit (cfg) url defaults;
         api_key_file = cfg.apiKeyFile;
+        courses = lib.mapAttrs (_: lib.filterAttrs (_: value: value != null)) cfg.courses;
       }
       // lib.optionalAttrs (cfg.editor != null) { inherit (cfg) editor; }
     );

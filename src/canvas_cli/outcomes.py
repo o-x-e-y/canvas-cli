@@ -1,6 +1,7 @@
 from collections import defaultdict
 
-from canvas_cli.api import get, get_all, pages, personal_course
+from canvas_cli.api import get, get_all, local_date, pages
+from canvas_cli.courses import resolve
 
 
 def outcome_results(course_url):
@@ -37,7 +38,7 @@ def fmt(score):
 
 
 def run(args):
-    course_url = f"/courses/{personal_course()['id']}"
+    course_url = resolve(args.course, "outcomes").url
     results, outcomes, assignments = outcome_results(course_url)
     scores = rollup_scores(course_url)
     titles = {i: outcome["title"].strip() for i, outcome in outcomes.items()}
@@ -84,14 +85,14 @@ def run(args):
         ):
             submitted = assignment["submission"]["submitted_at"]
             state = "not assessed yet" if submitted else "not handed in"
-            print(f"  {(submitted or '')[:10]:10}    ?  {assignment['name']} ({state})")
+            print(f"  {local_date(submitted):10}    ?  {assignment['name']} ({state})")
         for result in sorted(
             by_outcome[outcome_id],
             key=lambda r: r["submitted_or_assessed_at"],
             reverse=True,
         ):
             print(
-                f"  {result['submitted_or_assessed_at'][:10]}  "
+                f"  {local_date(result['submitted_or_assessed_at'])}  "
                 f"{fmt(result['score']):>3}  "
                 f"{assignments[result['links']['assignment']]}"
             )
@@ -99,4 +100,4 @@ def run(args):
     if no_outcomes:
         print("\nHanded in, not assessed, and no outcomes in the rubric:")
         for assignment in no_outcomes:
-            print(f"  {assignment['submission']['submitted_at'][:10]}  {assignment['name']}")
+            print(f"  {local_date(assignment['submission']['submitted_at'])}  {assignment['name']}")

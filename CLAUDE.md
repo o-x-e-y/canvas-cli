@@ -9,11 +9,14 @@ change their text there when a subcommand, flag or output changes.
 
 | file | |
 |---|---|
-| `api.py` | settings, the session, request helpers, Link-header pagination, the personal course |
+| `api.py` | settings, the session, request helpers with timeouts and rate-limit retries, error messages, Link-header pagination, local dates |
+| `courses.py` | `-c` resolution (nickname, id, name, per-subcommand default), course end dates, `courses`, `modules` |
 | `cli.py` | the argparse surface: every subcommand and its help text |
 | `assignment.py` | `assignment` (create or continue, rubric, module, publish, submit), `hand-in`, `delete` |
 | `outcomes.py` | `outcomes`: outcome rollups, results, and unassessed rubric claims |
 | `feedback.py` | `feedback`: new comments and assessments, state in `$XDG_STATE_HOME/canvas-feedback.json` |
+| `deadlines.py` | `deadlines`: planner items and missing submissions |
+| `announcements.py` | `announcements`: recent announcements, HTML to text |
 | `nix/hm-module.nix` | writes `~/.config/canvas/settings.json` and the feedback timer |
 
 ## Working on it
@@ -32,3 +35,10 @@ Canvas traps the code already handles:
 - An unrated rubric criterion keeps a `rating_id` but has no `points`, so a
   rating is only real when `points` is set.
 - Course names repeat every semester; pick by the newest term.
+- Canvas answers 401 both for a bad token and for an action your role can't
+  do; only the message tells them apart. The tool never decides what a role
+  may do: it tries, and passes Canvas's refusal on.
+- `-c` is defined with `default=SUPPRESS` on the root parser and on each
+  subparser; a default of None on the subparser would overwrite a `-c` given
+  before the subcommand. The per-subcommand default is applied after parsing.
+  There is a regression test.

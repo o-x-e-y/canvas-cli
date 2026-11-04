@@ -4,80 +4,88 @@ import shlex
 import subprocess
 import sys
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 
-import requests
-
-from canvas_cli.api import (
-    base_url,
-    check,
-    delete,
-    get,
-    get_all,
-    personal_course,
-    post,
-    put,
-    settings,
-)
+from canvas_cli.api import Error, base_url, delete, get, get_all, post, put, settings, upload
+from canvas_cli.courses import module_items, resolve, target_module
 
 TEMPLATE = """\
-# Canvas Assignment — fill in below, then save and close the editor.
-# Three sections separated by blank lines:
-#   1. Assignment name (required)
-#   2. Description — HTML supported (optional)
-#   3. Path to a file to submit (optional)
-#
-# Example:
-#   Week 3 Reflection
-#
-#   Write a 500-word reflection on the reading material.
-#
-#   /home/user/documents/reflection.pdf
-
-"""
+# New Canvas assignment. Fill in the fields, write the description as HTML
+# below the --- line, then save and close the editor. Lines starting with #
+# are ignored here; leave a field empty to skip it. doc takes one or more
+# paths, separated by commas.
+name: {name}
+rubric: {rubric}
+doc: {doc}
+---
+{desc}"""
 
 
-def from_editor():
+def from_editor(args):
     with tempfile.NamedTemporaryFile("w+", prefix="canvas-assignment-", suffix=".md") as f:
-        f.write(TEMPLATE)
+        f.write(
+            TEMPLATE.format(
+                name=args.name or "",
+                rubric=args.rubric or "",
+                doc=", ".join(args.doc),
+                desc=args.desc,
+            )
+        )
         f.flush()
         editor = settings().get("editor") or os.environ.get("EDITOR", "vi")
         subprocess.run([*shlex.split(editor), f.name], check=True)
         f.seek(0)
-        text = "\n".join(line for line in f.read().splitlines() if not line.startswith("#"))
+        text = f.read()
 
-    sections = [s for s in text.split("\n\n") if s.strip()]
-    if not sections:
-        sys.exit("Error: no assignment name found.")
+    header, separator, desc = text.partition("\n---\n")
+    if not separator:
+        raise Error("The form lost its --- line; nothing was created.")
+    fields = {}
+    for line in header.splitlines():
+        if not line.strip() or line.startswith("#"):
+            continue
+        key, colon, value = line.partition(":")
+        if not colon or key.strip() not in ("name", "rubric", "doc"):
+            raise Error(f"Unknown line in the form: {line}")
+        fields[key.strip()] = value.strip()
+    if not fields.get("name"):
+        raise Error("The form has no name; nothing was created.")
+    args.name = fields["name"]
+    args.rubric = fields.get("rubric") or None
+    args.doc = [d.strip() for d in fields.get("doc", "").split(",") if d.strip()]
+    args.desc = desc.strip()
 
-    name = sections[0].strip().splitlines()[0]
-    desc, doc = "", None
-    if len(sections) >= 3:
-        desc, doc = sections[1].strip(), "".join(sections[2].split())
-    elif len(sections) == 2:
-        candidate = "".join(sections[1].split())
-        if candidate.startswith(("/", "~")):
-            doc = candidate
+
+def rubric_criteria(course, wanted):
+    outcomes = {}
+    for link in get_all(f"{course.url}/outcome_group_links", outcome_style="full", per_page=100):
+        outcomes[link["outcome"]["id"]] = link["outcome"]
+    by_title = {}
+    for outcome in outcomes.values():
+        by_title.setdefault(outcome["title"].strip(), []).append(outcome)
+
+    chosen, problems = [], []
+    for title in wanted:
+        if title.isdigit() and int(title) in outcomes:
+            chosen.append(outcomes[int(title)])
+            continue
+        matches = by_title.get(title, [])
+        if len(matches) == 1:
+            chosen.append(matches[0])
+        elif matches:
+            ids = ", ".join(str(o["id"]) for o in matches)
+            problems.append(f"{title} matches {len(matches)} outcomes (ids: {ids}); pass the id")
         else:
-            desc = sections[1].strip()
-    return name, desc, doc
-
-
-def rubric_criteria(course_url, wanted):
-    by_title = {
-        link["outcome"]["title"].strip(): link["outcome"]
-        for link in get_all(f"{course_url}/outcome_group_links", outcome_style="full", per_page=100)
-    }
-    unknown = [title for title in wanted if title not in by_title]
-    if unknown:
-        sys.exit("Error: unknown outcome(s): " + ", ".join(unknown))
+            problems.append(f"{title} is not an outcome in {course.name}")
+    if problems:
+        raise Error("Unknown outcome(s): " + "; ".join(problems))
 
     criteria = {}
-    for i, title in enumerate(wanted):
-        outcome = by_title[title]
+    for i, outcome in enumerate(chosen):
         criteria[str(i)] = {
-            "description": title,
-            "long_description": re.sub(r"<link[^>]*>", "", outcome["description"]),
+            "description": outcome["title"].strip(),
+            "long_description": re.sub(r"<link[^>]*>", "", outcome["description"] or ""),
             "points": outcome["points_possible"],
             "learning_outcome_id": outcome["id"],
             "mastery_points": outcome["mastery_points"],
@@ -86,117 +94,142 @@ def rubric_criteria(course_url, wanted):
     return criteria
 
 
-def find_assignment(course_url, name):
+def find_assignment(course, name):
     matches = [
         assignment
-        for assignment in get_all(f"{course_url}/assignments", per_page=100)
+        for assignment in get_all(f"{course.url}/assignments", per_page=100)
         if assignment["name"] == name
     ]
     if len(matches) > 1:
         ids = ", ".join(str(a["id"]) for a in matches)
-        sys.exit(
-            f'Error: {len(matches)} assignments are named "{name}" '
-            f"(ids: {ids}). Delete or rename the extras first."
+        raise Error(
+            f'{len(matches)} assignments are named "{name}" (ids: {ids}). '
+            "Delete or rename the extras first."
         )
     return matches[0] if matches else None
 
 
+def files(docs):
+    paths = [Path(doc).expanduser() for doc in docs]
+    missing = [str(path) for path in paths if not path.is_file()]
+    if missing:
+        raise Error("No such file: " + ", ".join(missing))
+    return paths
+
+
+def submit(course, assignment_id, docs=(), url=None, text=None):
+    submissions = f"{course.url}/assignments/{assignment_id}/submissions"
+    if docs:
+        file_ids = []
+        for doc in docs:
+            slot = post(f"{submissions}/self/files", {"name": doc.name, "size": doc.stat().st_size})
+            file_ids.append(upload(slot["upload_url"], slot["upload_params"], doc)["id"])
+        submission = {"submission_type": "online_upload", "file_ids": file_ids}
+    elif url:
+        submission = {"submission_type": "online_url", "url": url}
+    else:
+        submission = {"submission_type": "online_text_entry", "body": text}
+    post(submissions, {"submission": submission})
+
+
+@contextmanager
+def step(doing):
+    try:
+        yield
+    except Error as error:
+        raise Error(
+            f"{error}\nThat was while {doing}; the steps before it are done. Rerun the "
+            "same command to continue from there."
+        ) from None
+
+
+def position_after(course, module, header):
+    items = sorted(module_items(course, module), key=lambda item: item["position"])
+    heads = [i for i in items if i["type"] == "SubHeader" and i["title"].strip() == header]
+    if not heads:
+        names = "\n  ".join(i["title"] for i in items if i["type"] == "SubHeader")
+        raise Error(f'{module["name"]} has no header "{header}". Its headers:\n  {names}')
+    head = heads[0]
+    last = head
+    for item in items[items.index(head) + 1 :]:
+        if item["indent"] <= head["indent"]:
+            break
+        last = item
+    return last["position"] + 1
+
+
 def run_delete(args):
-    course_url = f"/courses/{personal_course()['id']}"
+    course = resolve(args.course, "delete")
     wanted = args.assignment
     if wanted.isdigit():
-        assignment = get(f"{course_url}/assignments/{wanted}")
+        assignment = get(f"{course.url}/assignments/{wanted}")
     else:
-        assignment = find_assignment(course_url, wanted)
+        assignment = find_assignment(course, wanted)
         if not assignment:
-            sys.exit(f'Error: no assignment named "{wanted}".')
-    delete(f"{course_url}/assignments/{assignment['id']}")
-    print(
-        f"Deleted assignment: {assignment['name']} (id: {assignment['id']}). "
-        f"Restore it at {base_url()}{course_url}/undelete"
-    )
+            raise Error(f'{course.name} has no assignment named "{wanted}".')
+    label = f'"{assignment["name"]}" (id: {assignment["id"]}) from {course.name}'
+    if not args.yes:
+        if not sys.stdin.isatty():
+            raise Error(f"Pass --yes to delete {label} without asking.")
+        answer = input(f"Delete {label}, with any submissions on it? [y/N] ")
+        if answer.strip().lower() not in ("y", "yes"):
+            print("Nothing deleted.")
+            return
+    delete(f"{course.url}/assignments/{assignment['id']}")
+    print(f"Deleted {label}. Restore it at {base_url()}{course.url}/undelete")
 
 
-def find_course(wanted):
-    courses = get_all("/courses", enrollment_state="active", per_page=100, **{"include[]": "term"})
-    matches = [c for c in courses if wanted in (str(c["id"]), c["name"])]
-    if not matches:
-        names = "\n  ".join(sorted({c["name"] for c in courses}))
-        sys.exit(f'Error: no active course "{wanted}". Your courses:\n  {names}')
-    # Course names repeat every semester, so take the newest term
-    return max(matches, key=lambda c: (c.get("term") or {}).get("start_at") or "")
+SUBMISSION_TYPES = {"doc": "online_upload", "url": "online_url", "text": "online_text_entry"}
 
 
 def run_hand_in(args):
-    course = find_course(args.course)
-    name, doc = args.name, Path(args.doc).expanduser()
-    course_url = f"/courses/{course['id']}"
-    assignment = find_assignment(course_url, name)
+    docs = files(args.doc or [])
+    course = resolve(args.course, "hand-in")
+    assignment = find_assignment(course, args.name)
     if not assignment:
-        names = "\n  ".join(a["name"] for a in get_all(f"{course_url}/assignments", per_page=100))
-        sys.exit(
-            f'Error: {course["name"]} has no assignment named "{name}". Its assignments:\n  {names}'
+        names = "\n  ".join(a["name"] for a in get_all(f"{course.url}/assignments", per_page=100))
+        raise Error(
+            f'{course.name} has no assignment named "{args.name}". Its assignments:\n  {names}'
         )
-    if "online_upload" not in assignment["submission_types"]:
+    kind = "doc" if docs else "url" if args.url else "text"
+    if SUBMISSION_TYPES[kind] not in assignment["submission_types"]:
         types = ", ".join(assignment["submission_types"])
-        sys.exit(f'Error: "{name}" takes {types}, not a file upload.')
+        raise Error(f'"{args.name}" takes {types}, not {SUBMISSION_TYPES[kind]}.')
 
-    print(f"Uploading and submitting to {course['name']}: {doc}")
-    submit(course_url, assignment["id"], doc)
-    print("File submitted!")
-
-
-def submit(course_url, assignment_id, doc):
-    upload = post(
-        f"{course_url}/assignments/{assignment_id}/submissions/self/files",
-        {"name": doc.name, "size": doc.stat().st_size},
-    )
-    with doc.open("rb") as f:
-        file_id = check(
-            requests.post(
-                upload["upload_url"],
-                data=upload["upload_params"],
-                files={"file": f},
-            )
-        ).json()["id"]
-    post(
-        f"{course_url}/assignments/{assignment_id}/submissions",
-        {"submission": {"submission_type": "online_upload", "file_ids": [file_id]}},
-    )
+    print(f"Handing in to {course.name}: {args.name}")
+    submit(course, assignment["id"], docs, args.url, args.text)
+    print("Submitted!")
 
 
 def run(args):
-    if args.name:
-        name, desc, doc = args.name, args.desc, args.doc
-    else:
-        name, desc, doc = from_editor()
-    doc = Path(doc).expanduser() if doc else None
-
-    publish = args.publish or doc is not None
-    course_url = f"/courses/{personal_course()['id']}"
-    module = get_all(f"{course_url}/modules", per_page=100)[0]
+    if not args.name:
+        from_editor(args)
+    docs = files(args.doc)
+    publish = args.publish or bool(docs)
+    course = resolve(args.course, "assignment")
 
     criteria = None
     if args.rubric:
-        criteria = rubric_criteria(course_url, [title.strip() for title in args.rubric.split(",")])
+        criteria = rubric_criteria(course, [title.strip() for title in args.rubric.split(",")])
 
-    assignment = find_assignment(course_url, name)
+    assignment = find_assignment(course, args.name)
     if assignment:
-        print(f"Found existing assignment: {name} (id: {assignment['id']})")
-        if desc and desc != assignment["description"]:
-            put(
-                f"{course_url}/assignments/{assignment['id']}",
-                {"assignment": {"description": desc}},
-            )
+        print(f"Found existing assignment: {args.name} (id: {assignment['id']})")
+        if args.desc and args.desc != assignment["description"]:
+            with step("updating the description"):
+                put(
+                    f"{course.url}/assignments/{assignment['id']}",
+                    {"assignment": {"description": args.desc}},
+                )
             print("Description updated.")
     else:
-        print(f"Creating assignment: {name}")
+        print(f"Creating assignment: {args.name}")
         assignment = post(
-            f"{course_url}/assignments",
+            f"{course.url}/assignments",
             {
                 "assignment": {
-                    "name": name,
-                    "description": desc,
+                    "name": args.name,
+                    "description": args.desc,
                     "submission_types": ["online_upload"],
                     "published": publish,
                 }
@@ -205,45 +238,52 @@ def run(args):
         print(f"Assignment created (id: {assignment['id']}).")
     assignment_id = assignment["id"]
 
-    in_module = get(
-        f"{course_url}/module_item_sequence",
-        asset_type="Assignment",
-        asset_id=assignment_id,
-    )["items"]
-    if not in_module:
-        print(f"Adding to module {module['name']}...")
-        post(
-            f"{course_url}/modules/{module['id']}/items",
-            {"module_item": {"type": "Assignment", "content_id": assignment_id, "indent": 1}},
-        )
-        print("Added to module.")
+    with step("adding it to a module"):
+        in_module = get(
+            f"{course.url}/module_item_sequence", asset_type="Assignment", asset_id=assignment_id
+        )["items"]
+        if in_module:
+            if args.after or args.indent is not None:
+                print("It is already in a module; --after and --indent only apply when adding it.")
+        else:
+            module = target_module(course)
+            item = {
+                "type": "Assignment",
+                "content_id": assignment_id,
+                "indent": course.indent if args.indent is None else args.indent,
+            }
+            if args.after:
+                item["position"] = position_after(course, module, args.after)
+            print(f"Adding to module {module['name']}...")
+            post(f"{course.url}/modules/{module['id']}/items", {"module_item": item})
+            print("Added to module.")
 
     if criteria and assignment.get("rubric"):
         print("The assignment already has a rubric; leaving it as is.")
     elif criteria:
         print(f"Adding rubric: {args.rubric}")
-        post(
-            f"{course_url}/rubrics",
-            {
-                "rubric": {"title": name, "criteria": criteria},
-                "rubric_association": {
-                    "association_type": "Assignment",
-                    "association_id": assignment_id,
-                    "purpose": "grading",
-                    "use_for_grading": False,
+        with step("adding the rubric"):
+            post(
+                f"{course.url}/rubrics",
+                {
+                    "rubric": {"title": args.name, "criteria": criteria},
+                    "rubric_association": {
+                        "association_type": "Assignment",
+                        "association_id": assignment_id,
+                        "purpose": "grading",
+                        "use_for_grading": False,
+                    },
                 },
-            },
-        )
+            )
         print("Rubric added.")
 
     if publish and not assignment["published"]:
-        put(
-            f"{course_url}/assignments/{assignment_id}",
-            {"assignment": {"published": True}},
-        )
+        with step("publishing it"):
+            put(f"{course.url}/assignments/{assignment_id}", {"assignment": {"published": True}})
         print("Assignment published.")
 
-    if doc:
-        print(f"Uploading and submitting: {doc}")
-        submit(course_url, assignment_id, doc)
-        print("File submitted!")
+    if docs:
+        print("Uploading and submitting: " + ", ".join(str(doc) for doc in docs))
+        with step("submitting the files"):
+            submit(course, assignment_id, docs)
+        print("Submitted!")

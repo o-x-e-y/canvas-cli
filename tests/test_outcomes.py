@@ -1,4 +1,4 @@
-from conftest import API, COURSE, PERSONAL, run
+from conftest import COURSE, PERSONAL, run
 
 ANALYSIS = {
     "id": 501,
@@ -24,7 +24,7 @@ def result(id, assignment, score, at):
 
 
 def test_standing_with_assessed_unrated_and_claimed_work(canvas, capsys):
-    canvas.get(f"{API}/courses", json=[PERSONAL])
+    canvas.get(COURSE, json=PERSONAL)
     canvas.get(
         f"{COURSE}/outcome_results",
         json={
