@@ -2,17 +2,17 @@ import argparse
 import json
 import os
 import subprocess
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
-from canvas_api import get, get_all
+from canvas_cli.api import get, get_all
 
 STATE_HOME = os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state")
 STATE_PATH = Path(STATE_HOME, "canvas-feedback.json")
 
 
 def current_courses():
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     courses = get_all(
         "/courses",
         enrollment_type="student",
@@ -21,9 +21,7 @@ def current_courses():
         **{"include[]": "term"},
     )
     return [
-        course
-        for course in courses
-        if ((course.get("term") or {}).get("end_at") or now) >= now
+        course for course in courses if ((course.get("term") or {}).get("end_at") or now) >= now
     ]
 
 
@@ -99,10 +97,7 @@ def main():
                 continue
             print(f"{title}\n{body}\n")
             if args.notify:
-                subprocess.run(["notify-send", "--app-name=Canvas", title, body])
+                subprocess.run(["notify-send", "--app-name=Canvas", title, body], check=False)
 
     STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
     STATE_PATH.write_text(json.dumps(sorted(key for key, _, _ in items)))
-
-
-main()

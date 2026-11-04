@@ -1,16 +1,46 @@
+import json
+import os
 import sys
+from functools import cache
 from pathlib import Path
 
 import requests
 
-BASE_URL = "https://fontysict.instructure.com"
-API_KEY_PATH = "/run/secrets/canvas-api-key"
+CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")
 
-session = requests.Session()
-session.headers["Authorization"] = (
-    "Bearer " + Path(API_KEY_PATH).read_text().strip()
-)
-api_url = f"{BASE_URL}/api/v1"
+
+@cache
+def settings():
+    path = Path(CONFIG_HOME, "canvas/settings.json")
+    try:
+        values = json.loads(path.read_text())
+    except FileNotFoundError:
+        values = {}
+    missing = [key for key in ("url", "api_key_file") if not values.get(key)]
+    if missing:
+        sys.exit(
+            f"Error: {path} needs {' and '.join(missing)}: the Canvas instance, "
+            'such as "https://school.instructure.com", and a file holding an '
+            "access token."
+        )
+    return values
+
+
+def base_url():
+    return settings()["url"].rstrip("/")
+
+
+def api_url():
+    return base_url() + "/api/v1"
+
+
+@cache
+def session():
+    s = requests.Session()
+    s.headers["Authorization"] = (
+        "Bearer " + Path(settings()["api_key_file"]).expanduser().read_text().strip()
+    )
+    return s
 
 
 def check(response):
@@ -23,30 +53,33 @@ def check(response):
 
 
 def get(path, **params):
-    return check(session.get(api_url + path, params=params)).json()
+    return check(session().get(api_url() + path, params=params)).json()
+
+
+def pages(path, **params):
+    url = api_url() + path
+    while url:
+        response = check(session().get(url, params=params))
+        yield response.json()
+        url = response.links.get("next", {}).get("url")
+        # The next link already carries the query string
+        params = None
 
 
 def get_all(path, **params):
-    items = []
-    url = api_url + path
-    while url:
-        response = check(session.get(url, params=params))
-        items += response.json()
-        url = response.links.get("next", {}).get("url")
-        params = None
-    return items
+    return [item for page in pages(path, **params) for item in page]
 
 
 def post(path, body):
-    return check(session.post(api_url + path, json=body)).json()
+    return check(session().post(api_url() + path, json=body)).json()
 
 
 def put(path, body):
-    return check(session.put(api_url + path, json=body)).json()
+    return check(session().put(api_url() + path, json=body)).json()
 
 
 def delete(path):
-    return check(session.delete(api_url + path)).json()
+    return check(session().delete(api_url() + path)).json()
 
 
 def personal_course():

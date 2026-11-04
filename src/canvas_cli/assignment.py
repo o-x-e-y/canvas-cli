@@ -9,7 +9,17 @@ from pathlib import Path
 
 import requests
 
-from canvas_api import BASE_URL, check, delete, get, get_all, personal_course, post, put
+from canvas_cli.api import (
+    base_url,
+    check,
+    delete,
+    get,
+    get_all,
+    personal_course,
+    post,
+    put,
+    settings,
+)
 
 TEMPLATE = """\
 # Canvas Assignment — fill in below, then save and close the editor.
@@ -29,17 +39,13 @@ TEMPLATE = """\
 
 
 def from_editor():
-    with tempfile.NamedTemporaryFile(
-        "w+", prefix="canvas-assignment-", suffix=".md"
-    ) as f:
+    with tempfile.NamedTemporaryFile("w+", prefix="canvas-assignment-", suffix=".md") as f:
         f.write(TEMPLATE)
         f.flush()
-        editor = os.environ.get("CANVAS_EDITOR", "codium --wait")
+        editor = settings().get("editor") or os.environ.get("EDITOR", "vi")
         subprocess.run([*shlex.split(editor), f.name], check=True)
         f.seek(0)
-        text = "\n".join(
-            line for line in f.read().splitlines() if not line.startswith("#")
-        )
+        text = "\n".join(line for line in f.read().splitlines() if not line.startswith("#"))
 
     sections = [s for s in text.split("\n\n") if s.strip()]
     if not sections:
@@ -61,9 +67,7 @@ def from_editor():
 def rubric_criteria(course_url, wanted):
     by_title = {
         link["outcome"]["title"].strip(): link["outcome"]
-        for link in get_all(
-            f"{course_url}/outcome_group_links", outcome_style="full", per_page=100
-        )
+        for link in get_all(f"{course_url}/outcome_group_links", outcome_style="full", per_page=100)
     }
     unknown = [title for title in wanted if title not in by_title]
     if unknown:
@@ -108,14 +112,12 @@ def delete_assignment(course_url, wanted):
     delete(f"{course_url}/assignments/{assignment['id']}")
     print(
         f"Deleted assignment: {assignment['name']} (id: {assignment['id']}). "
-        f"Restore it at {BASE_URL}{course_url}/undelete"
+        f"Restore it at {base_url()}{course_url}/undelete"
     )
 
 
 def find_course(wanted):
-    courses = get_all(
-        "/courses", enrollment_state="active", per_page=100, **{"include[]": "term"}
-    )
+    courses = get_all("/courses", enrollment_state="active", per_page=100, **{"include[]": "term"})
     matches = [c for c in courses if wanted in (str(c["id"]), c["name"])]
     if not matches:
         names = "\n  ".join(sorted({c["name"] for c in courses}))
@@ -128,12 +130,9 @@ def hand_in(course, name, doc):
     course_url = f"/courses/{course['id']}"
     assignment = find_assignment(course_url, name)
     if not assignment:
-        names = "\n  ".join(
-            a["name"] for a in get_all(f"{course_url}/assignments", per_page=100)
-        )
+        names = "\n  ".join(a["name"] for a in get_all(f"{course_url}/assignments", per_page=100))
         sys.exit(
-            f'Error: {course['name']} has no assignment named "{name}". '
-            f"Its assignments:\n  {names}"
+            f'Error: {course["name"]} has no assignment named "{name}". Its assignments:\n  {names}'
         )
     if "online_upload" not in assignment["submission_types"]:
         types = ", ".join(assignment["submission_types"])
@@ -167,8 +166,8 @@ def main():
     parser = argparse.ArgumentParser(
         description="Create an assignment in the personal Canvas course, or "
         "continue one with the same name: add what it is missing and submit "
-        "--doc as a new attempt. Without --name, opens $CANVAS_EDITOR for a "
-        "form."
+        "--doc as a new attempt. Without --name, opens the editor from the "
+        "settings, or $EDITOR, for a form."
     )
     parser.add_argument("--name", help="assignment title")
     parser.add_argument("--desc", default="", help="description, as HTML")
@@ -176,9 +175,7 @@ def main():
         "--rubric",
         help="comma-separated learning outcomes, e.g. Analysis-S2,PL-1",
     )
-    parser.add_argument(
-        "--doc", help="file to upload and submit; publishes the assignment"
-    )
+    parser.add_argument("--doc", help="file to upload and submit; publishes the assignment")
     parser.add_argument(
         "--publish",
         action="store_true",
@@ -191,8 +188,7 @@ def main():
     )
     parser.add_argument(
         "--course",
-        help="hand --doc in to an existing assignment in this course instead, "
-        "by name or id",
+        help="hand --doc in to an existing assignment in this course instead, by name or id",
     )
     args = parser.parse_args()
 
@@ -220,9 +216,7 @@ def main():
 
     criteria = None
     if args.rubric:
-        criteria = rubric_criteria(
-            course_url, [title.strip() for title in args.rubric.split(",")]
-        )
+        criteria = rubric_criteria(course_url, [title.strip() for title in args.rubric.split(",")])
 
     assignment = find_assignment(course_url, name)
     if assignment:
@@ -291,6 +285,3 @@ def main():
         print(f"Uploading and submitting: {doc}")
         submit(course_url, assignment_id, doc)
         print("File submitted!")
-
-
-main()

@@ -1,34 +1,26 @@
 import argparse
 from collections import defaultdict
 
-from canvas_api import api_url, check, get, get_all, personal_course, session
+from canvas_cli.api import get, get_all, pages, personal_course
 
 
 def outcome_results(course_url):
     results, outcomes, assignments = [], {}, {}
-    url = f"{api_url}{course_url}/outcome_results"
-    params = {
-        "user_ids[]": "self",
-        "include[]": ["outcomes", "alignments"],
-        "per_page": 100,
-    }
-    while url:
-        response = check(session.get(url, params=params))
-        body = response.json()
+    for body in pages(
+        f"{course_url}/outcome_results",
+        per_page=100,
+        **{"user_ids[]": "self", "include[]": ["outcomes", "alignments"]},
+    ):
         results += body["outcome_results"]
         for outcome in body["linked"]["outcomes"]:
             outcomes[str(outcome["id"])] = outcome
         for alignment in body["linked"]["alignments"]:
             assignments[alignment["id"]] = alignment["name"]
-        url = response.links.get("next", {}).get("url")
-        params = None
     return results, outcomes, assignments
 
 
 def rollup_scores(course_url):
-    rollups = get(f"{course_url}/outcome_rollups", **{"user_ids[]": "self"})[
-        "rollups"
-    ]
+    rollups = get(f"{course_url}/outcome_rollups", **{"user_ids[]": "self"})["rollups"]
     if not rollups:
         return {}
     return {s["links"]["outcome"]: s["score"] for s in rollups[0]["scores"]}
@@ -70,9 +62,7 @@ def main():
     ):
         if f"assignment_{assignment['id']}" in assessed:
             continue
-        criteria = [
-            c for c in assignment.get("rubric", []) if c.get("outcome_id")
-        ]
+        criteria = [c for c in assignment.get("rubric", []) if c.get("outcome_id")]
         for criterion in criteria:
             outcome_id = str(criterion["outcome_id"])
             titles.setdefault(outcome_id, criterion["description"].strip())
@@ -91,8 +81,7 @@ def main():
         else:
             mastery = " mastery" if score >= outcome["mastery_points"] else ""
             summary = (
-                f"{fmt(score)}/{fmt(outcome['points_possible'])} "
-                f"{rating(outcome, score)}{mastery}"
+                f"{fmt(score)}/{fmt(outcome['points_possible'])} {rating(outcome, score)}{mastery}"
             )
         print(f"{titles[outcome_id]}: {summary}")
 
@@ -118,10 +107,4 @@ def main():
     if no_outcomes:
         print("\nHanded in, not assessed, and no outcomes in the rubric:")
         for assignment in no_outcomes:
-            print(
-                f"  {assignment['submission']['submitted_at'][:10]}  "
-                f"{assignment['name']}"
-            )
-
-
-main()
+            print(f"  {assignment['submission']['submitted_at'][:10]}  {assignment['name']}")
