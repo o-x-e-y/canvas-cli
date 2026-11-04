@@ -1,5 +1,5 @@
 {
-  description = "CLIs for a student's own Canvas LMS work";
+  description = "CLI for a student's own Canvas LMS work";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";

@@ -1,4 +1,3 @@
-import argparse
 import json
 import os
 import subprocess
@@ -75,17 +74,7 @@ def feedback(me):
                 )
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Print feedback on your Canvas submissions that is new "
-        "since the last run: comments from others and assessments, in "
-        "courses whose term is still running."
-    )
-    parser.add_argument(
-        "--notify", action="store_true", help="also show each one as a notification"
-    )
-    args = parser.parse_args()
-
+def run(args):
     seen = set(json.loads(STATE_PATH.read_text())) if STATE_PATH.exists() else None
     items = list(feedback(get("/users/self")["id"]))
 

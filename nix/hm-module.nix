@@ -41,7 +41,7 @@ in
       default = null;
       example = "codium --wait";
       description = ''
-        The editor `canvas-assignment` opens for its form when no `--name` is
+        The editor `canvas assignment` opens for its form when no `--name` is
         given. It must wait until the file is closed. Null falls back to
         `$EDITOR`.
       '';
@@ -74,7 +74,7 @@ in
       Service = {
         Type = "oneshot";
         Environment = "PATH=${pkgs.libnotify}/bin";
-        ExecStart = "${cfg.package}/bin/canvas-feedback --notify";
+        ExecStart = "${lib.getExe cfg.package} feedback --notify";
       };
     };
 

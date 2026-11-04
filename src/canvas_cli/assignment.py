@@ -1,4 +1,3 @@
-import argparse
 import os
 import re
 import shlex
@@ -102,7 +101,9 @@ def find_assignment(course_url, name):
     return matches[0] if matches else None
 
 
-def delete_assignment(course_url, wanted):
+def run_delete(args):
+    course_url = f"/courses/{personal_course()['id']}"
+    wanted = args.assignment
     if wanted.isdigit():
         assignment = get(f"{course_url}/assignments/{wanted}")
     else:
@@ -126,7 +127,9 @@ def find_course(wanted):
     return max(matches, key=lambda c: (c.get("term") or {}).get("start_at") or "")
 
 
-def hand_in(course, name, doc):
+def run_hand_in(args):
+    course = find_course(args.course)
+    name, doc = args.name, Path(args.doc).expanduser()
     course_url = f"/courses/{course['id']}"
     assignment = find_assignment(course_url, name)
     if not assignment:
@@ -162,53 +165,12 @@ def submit(course_url, assignment_id, doc):
     )
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Create an assignment in the personal Canvas course, or "
-        "continue one with the same name: add what it is missing and submit "
-        "--doc as a new attempt. Without --name, opens the editor from the "
-        "settings, or $EDITOR, for a form."
-    )
-    parser.add_argument("--name", help="assignment title")
-    parser.add_argument("--desc", default="", help="description, as HTML")
-    parser.add_argument(
-        "--rubric",
-        help="comma-separated learning outcomes, e.g. Analysis-S2,PL-1",
-    )
-    parser.add_argument("--doc", help="file to upload and submit; publishes the assignment")
-    parser.add_argument(
-        "--publish",
-        action="store_true",
-        help="publish the assignment without submitting anything",
-    )
-    parser.add_argument(
-        "--delete",
-        metavar="ID_OR_NAME",
-        help="delete this assignment from the personal course instead",
-    )
-    parser.add_argument(
-        "--course",
-        help="hand --doc in to an existing assignment in this course instead, by name or id",
-    )
-    args = parser.parse_args()
-
-    if args.delete:
-        if args.name or args.desc or args.rubric or args.doc or args.publish or args.course:
-            sys.exit("Error: --delete takes no other options.")
-        delete_assignment(f"/courses/{personal_course()['id']}", args.delete)
-        return
-
+def run(args):
     if args.name:
         name, desc, doc = args.name, args.desc, args.doc
     else:
         name, desc, doc = from_editor()
     doc = Path(doc).expanduser() if doc else None
-
-    if args.course:
-        if not doc or desc or args.rubric or args.publish:
-            sys.exit("Error: --course takes --name and --doc, and nothing else.")
-        hand_in(find_course(args.course), name, doc)
-        return
 
     publish = args.publish or doc is not None
     course_url = f"/courses/{personal_course()['id']}"

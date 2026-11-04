@@ -17,7 +17,7 @@ import responses
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from canvas_cli import api
+from canvas_cli import api, cli
 
 BASE = "https://canvas.test"
 API = BASE + "/api/v1"
@@ -55,9 +55,8 @@ def personal(canvas):
     return canvas
 
 
-def run(monkeypatch, main, *args):
-    monkeypatch.setattr(sys, "argv", ["prog", *args])
-    main()
+def run(*argv):
+    cli.main(list(argv))
 
 
 def body(call):

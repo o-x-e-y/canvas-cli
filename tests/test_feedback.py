@@ -43,17 +43,17 @@ def serve(canvas, *submissions):
     canvas.get(f"{API}/courses/21/students/submissions", json=list(submissions))
 
 
-def test_first_run_only_records(canvas, state, monkeypatch, capsys):
+def test_first_run_only_records(canvas, state, capsys):
     comment = {"id": 1, "author_id": 2, "author_name": "Teacher", "comment": "Nice"}
     serve(canvas, submission(submission_comments=[comment]))
 
-    run(monkeypatch, feedback.main)
+    run("feedback")
 
     assert capsys.readouterr().out.startswith("First run: recorded 1 existing items")
     assert json.loads(state.read_text()) == ["comment:1"]
 
 
-def test_reports_new_comments_and_assessments_once(canvas, state, monkeypatch, capsys):
+def test_reports_new_comments_and_assessments_once(canvas, state, capsys):
     state.write_text(json.dumps(["comment:1"]))
     comments = [
         {"id": 1, "author_id": 2, "author_name": "Teacher", "comment": "Old"},
@@ -70,7 +70,7 @@ def test_reports_new_comments_and_assessments_once(canvas, state, monkeypatch, c
         ),
     )
 
-    run(monkeypatch, feedback.main)
+    run("feedback")
 
     assert capsys.readouterr().out == (
         "CMK: Plan\nTeacher: New\n\n"

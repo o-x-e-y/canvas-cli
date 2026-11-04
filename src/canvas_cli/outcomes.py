@@ -1,4 +1,3 @@
-import argparse
 from collections import defaultdict
 
 from canvas_cli.api import get, get_all, pages, personal_course
@@ -37,14 +36,7 @@ def fmt(score):
     return "-" if score is None else f"{score:g}"
 
 
-def main():
-    argparse.ArgumentParser(
-        description="Show the current score on each learning outcome in the "
-        "personal Canvas course and the assignments behind it: assessed ones "
-        "with their score, '-' for a criterion left unrated, and '?' for ones "
-        "whose rubric claims the outcome but that are not assessed yet."
-    ).parse_args()
-
+def run(args):
     course_url = f"/courses/{personal_course()['id']}"
     results, outcomes, assignments = outcome_results(course_url)
     scores = rollup_scores(course_url)

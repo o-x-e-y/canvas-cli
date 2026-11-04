@@ -22,14 +22,14 @@ python3Packages.buildPythonApplication {
   pythonImportsCheck = [ "canvas_cli" ];
 
   meta = {
-    description = "CLIs for a student's own Canvas LMS work";
+    description = "CLI for a student's own Canvas LMS work";
     longDescription = ''
-      canvas-assignment creates proof-of-work assignments with outcome rubrics
-      in a personal course and hands files in, canvas-outcomes shows the
-      standing on each learning outcome, and canvas-feedback reports new
-      comments and assessments on submissions.
+      canvas creates proof-of-work assignments with outcome rubrics in a
+      personal course and hands files in, shows the standing on each learning
+      outcome, and reports new comments and assessments on submissions.
     '';
     license = lib.licenses.mit;
+    mainProgram = "canvas";
     platforms = lib.platforms.all;
   };
 }

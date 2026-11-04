@@ -1,7 +1,5 @@
 from conftest import API, COURSE, PERSONAL, run
 
-from canvas_cli.outcomes import main
-
 ANALYSIS = {
     "id": 501,
     "title": "Analysis-S2",
@@ -25,7 +23,7 @@ def result(id, assignment, score, at):
     }
 
 
-def test_standing_with_assessed_unrated_and_claimed_work(canvas, monkeypatch, capsys):
+def test_standing_with_assessed_unrated_and_claimed_work(canvas, capsys):
     canvas.get(f"{API}/courses", json=[PERSONAL])
     canvas.get(
         f"{COURSE}/outcome_results",
@@ -72,7 +70,7 @@ def test_standing_with_assessed_unrated_and_claimed_work(canvas, monkeypatch, ca
         ],
     )
 
-    run(monkeypatch, main)
+    run("outcomes")
 
     assert capsys.readouterr().out == (
         "Analysis-S2: 3/4 Proficient mastery\n"

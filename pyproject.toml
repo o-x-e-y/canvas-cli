@@ -5,16 +5,14 @@ build-backend = "hatchling.build"
 [project]
 name = "canvas-cli"
 version = "0.1.0"
-description = "CLIs for a student's own Canvas LMS work: proof-of-work assignments, outcome standing and new feedback"
+description = "CLI for a student's own Canvas LMS work: proof-of-work assignments, outcome standing and new feedback"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 dependencies = ["requests>=2.31"]
 
 [project.scripts]
-canvas-assignment = "canvas_cli.assignment:main"
-canvas-outcomes = "canvas_cli.outcomes:main"
-canvas-feedback = "canvas_cli.feedback:main"
+canvas = "canvas_cli.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/canvas_cli"]

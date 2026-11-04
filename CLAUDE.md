@@ -1,17 +1,19 @@
 # canvas-cli
 
-Three CLIs over the Canvas REST API for the user's own school work. The skills
-that drive them (`canvas-submit`, `fontys-coach`) live in the user's nixos
-repo, not here; change their text there when a flag or output changes.
+One `canvas` command over the Canvas REST API for the user's own school work,
+with subcommands; `canvas --help` lists them. The skills that drive it
+(`canvas-submit`, `fontys-coach`) live in the user's nixos repo, not here;
+change their text there when a subcommand, flag or output changes.
 
 ## Layout
 
 | file | |
 |---|---|
 | `api.py` | settings, the session, request helpers, Link-header pagination, the personal course |
-| `assignment.py` | `canvas-assignment`: create or continue, rubric, module, publish, submit, `--course`, `--delete` |
-| `outcomes.py` | `canvas-outcomes`: outcome rollups, results, and unassessed rubric claims |
-| `feedback.py` | `canvas-feedback`: new comments and assessments, state in `$XDG_STATE_HOME/canvas-feedback.json` |
+| `cli.py` | the argparse surface: every subcommand and its help text |
+| `assignment.py` | `assignment` (create or continue, rubric, module, publish, submit), `hand-in`, `delete` |
+| `outcomes.py` | `outcomes`: outcome rollups, results, and unassessed rubric claims |
+| `feedback.py` | `feedback`: new comments and assessments, state in `$XDG_STATE_HOME/canvas-feedback.json` |
 | `nix/hm-module.nix` | writes `~/.config/canvas/settings.json` and the feedback timer |
 
 ## Working on it
