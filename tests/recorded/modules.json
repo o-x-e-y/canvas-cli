@@ -1,0 +1,366 @@
+{
+ "argv": [
+  "modules",
+  "-c",
+  "10000"
+ ],
+ "now": "2026-11-05T11:29:14+00:00",
+ "exchanges": [
+  {
+   "method": "GET",
+   "url": "https://canvas.test/api/v1/courses/10000?include%5B%5D=term",
+   "status": 200,
+   "link": null,
+   "json": {
+    "id": 10000,
+    "name": "Name 1",
+    "start_at": "2025-02-17T09:23:58Z",
+    "end_at": null,
+    "term": {
+     "id": 363,
+     "name": "Name 2",
+     "start_at": "2026-07-13T22:00:00Z",
+     "end_at": "2027-01-31T23:00:00Z"
+    },
+    "enrollments": [
+     {
+      "type": "teacher"
+     },
+     {
+      "type": "student"
+     },
+     {
+      "type": "teacher"
+     }
+    ],
+    "restrict_enrollments_to_course_dates": true
+   }
+  },
+  {
+   "method": "GET",
+   "url": "https://canvas.test/api/v1/courses/10000/modules?per_page=100&include%5B%5D=items",
+   "status": 200,
+   "link": "<https://canvas.test/api/v1/courses/10000/modules?include%5B%5D=items&page=1&per_page=100>; rel=\"current\",<https://canvas.test/api/v1/courses/10000/modules?include%5B%5D=items&page=1&per_page=100>; rel=\"first\",<https://canvas.test/api/v1/courses/10000/modules?include%5B%5D=items&page=1&per_page=100>; rel=\"last\"",
+   "json": [
+    {
+     "id": 10001,
+     "name": "Name 3",
+     "items": [
+      {
+       "id": 10002,
+       "title": "Title 4",
+       "indent": 0,
+       "type": "SubHeader"
+      },
+      {
+       "id": 10003,
+       "title": "Title 4",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10003"
+      },
+      {
+       "id": 10004,
+       "title": "Title 5",
+       "indent": 0,
+       "type": "SubHeader"
+      },
+      {
+       "id": 10005,
+       "title": "Title 6",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10005"
+      },
+      {
+       "id": 10006,
+       "title": "Title 7",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10006"
+      },
+      {
+       "id": 10007,
+       "title": "Title 8",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10007"
+      },
+      {
+       "id": 10008,
+       "title": "Title 9",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10008"
+      },
+      {
+       "id": 10009,
+       "title": "Title 10",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10009"
+      },
+      {
+       "id": 10010,
+       "title": "Title 11",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10010"
+      }
+     ]
+    },
+    {
+     "id": 10011,
+     "name": "Name 12",
+     "items": [
+      {
+       "id": 10012,
+       "title": "Title 13",
+       "indent": 0,
+       "type": "Page",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10012"
+      },
+      {
+       "id": 10013,
+       "title": "Title 14",
+       "indent": 0,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10013"
+      },
+      {
+       "id": 10014,
+       "title": "Title 15",
+       "indent": 0,
+       "type": "Page",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10014"
+      },
+      {
+       "id": 10015,
+       "title": "Title 16",
+       "indent": 0,
+       "type": "SubHeader"
+      }
+     ]
+    },
+    {
+     "id": 10016,
+     "name": "Name 17",
+     "items": [
+      {
+       "id": 10017,
+       "title": "Title 18",
+       "indent": 0,
+       "type": "SubHeader"
+      },
+      {
+       "id": 10018,
+       "title": "Title 19",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10018"
+      },
+      {
+       "id": 10019,
+       "title": "Title 20",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10019"
+      },
+      {
+       "id": 10020,
+       "title": "Title 21",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10020"
+      },
+      {
+       "id": 10021,
+       "title": "Title 22",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10021"
+      },
+      {
+       "id": 10022,
+       "title": "Title 23",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10022"
+      },
+      {
+       "id": 10023,
+       "title": "Title 24",
+       "indent": 0,
+       "type": "SubHeader"
+      },
+      {
+       "id": 10024,
+       "title": "Title 25",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10024"
+      },
+      {
+       "id": 10025,
+       "title": "Title 26",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10025"
+      },
+      {
+       "id": 10026,
+       "title": "Title 27",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10026"
+      },
+      {
+       "id": 10027,
+       "title": "Title 28",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10027"
+      },
+      {
+       "id": 10028,
+       "title": "Title 29",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10028"
+      },
+      {
+       "id": 10029,
+       "title": "Title 30",
+       "indent": 1,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10029"
+      }
+     ]
+    },
+    {
+     "id": 10030,
+     "name": "Name 31",
+     "items": [
+      {
+       "id": 10031,
+       "title": "Title 32",
+       "indent": 0,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10031"
+      },
+      {
+       "id": 10032,
+       "title": "Title 33",
+       "indent": 0,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10032"
+      },
+      {
+       "id": 10033,
+       "title": "Title 34",
+       "indent": 0,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10033"
+      },
+      {
+       "id": 10034,
+       "title": "Title 35",
+       "indent": 0,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10034"
+      },
+      {
+       "id": 10035,
+       "title": "Title 36",
+       "indent": 0,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10035"
+      },
+      {
+       "id": 10036,
+       "title": "Title 37",
+       "indent": 0,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10036"
+      }
+     ]
+    },
+    {
+     "id": 10037,
+     "name": "Name 38",
+     "items": [
+      {
+       "id": 10038,
+       "title": "Title 39",
+       "indent": 0,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10038"
+      },
+      {
+       "id": 10039,
+       "title": "Title 40",
+       "indent": 0,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10039"
+      },
+      {
+       "id": 10040,
+       "title": "Title 41",
+       "indent": 0,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10040"
+      },
+      {
+       "id": 10041,
+       "title": "Title 42",
+       "indent": 0,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10041"
+      },
+      {
+       "id": 10042,
+       "title": "Title 43",
+       "indent": 0,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10042"
+      },
+      {
+       "id": 10043,
+       "title": "Title 44",
+       "indent": 0,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10043"
+      },
+      {
+       "id": 10044,
+       "title": "Title 45",
+       "indent": 0,
+       "type": "Assignment",
+       "html_url": "https://canvas.test/courses/10000/modules/items/10044"
+      }
+     ]
+    },
+    {
+     "id": 10045,
+     "name": "Name 46",
+     "items": []
+    },
+    {
+     "id": 10046,
+     "name": "Name 47",
+     "items": []
+    },
+    {
+     "id": 10047,
+     "name": "Name 48",
+     "items": []
+    },
+    {
+     "id": 10048,
+     "name": "Name 49",
+     "items": []
+    }
+   ]
+  }
+ ]
+}

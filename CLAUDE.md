@@ -21,8 +21,13 @@ change their text there when a subcommand, flag or output changes.
 
 ## Working on it
 
-`nix develop`, then `pytest` and `ruff check`. The suite is offline:
-`responses` serves hand-written payloads, so no test touches a real course.
+`nix develop`, then `pytest` and `ruff check`. The suite is offline, so no
+test touches a real course. `responses` serves hand-written payloads for the
+edge cases, and `tests/recorded` holds real read-only responses with the
+output they give. `python tests/record.py <course>` records them again: it
+keeps only the fields in `FIELDS` (it stops when those don't reproduce the
+live output), replaces names with placeholders, masks text and renumbers
+ids. Read the diff for anything personal before committing it.
 Every command that writes to Canvas changes the user's real courses, so test
 against the live API only with read-only calls, or with the user's go-ahead.
 

@@ -1,0 +1,82 @@
+{
+ "argv": [
+  "deadlines"
+ ],
+ "now": "2026-11-05T11:29:22+00:00",
+ "exchanges": [
+  {
+   "method": "GET",
+   "url": "https://canvas.test/api/v1/planner/items?start_date=2026-11-05T11%3A29%3A22%2B00%3A00&end_date=2026-11-19T11%3A29%3A22%2B00%3A00&per_page=100",
+   "status": 200,
+   "link": "<https://canvas.test/api/v1/planner/items?end_date=2026-11-19T11%3A29%3A22%2B00%3A00&start_date=2026-11-05T11%3A29%3A22%2B00%3A00&page=first&per_page=100>; rel=\"current\",<https://canvas.test/api/v1/planner/items?end_date=2026-11-19T11%3A29%3A22%2B00%3A00&start_date=2026-11-05T11%3A29%3A22%2B00%3A00&page=first&per_page=100>; rel=\"first\",<https://canvas.test/api/v1/planner/items?end_date=2026-11-19T11%3A29%3A22%2B00%3A00&start_date=2026-11-05T11%3A29%3A22%2B00%3A00&page=first&per_page=100>; rel=\"last\"",
+   "json": [
+    {
+     "course_id": 10000,
+     "plannable_type": "assignment",
+     "submissions": {
+      "submitted": true,
+      "excused": false,
+      "graded": false,
+      "posted_at": "2026-10-12T08:31:51Z",
+      "late": false,
+      "missing": false
+     },
+     "plannable_date": "2026-11-06T15:00:00Z",
+     "plannable": {
+      "id": 10001,
+      "title": "Title 1",
+      "points_possible": 1.0,
+      "due_at": "2026-11-06T15:00:00Z"
+     },
+     "html_url": "/courses/10000/assignments/10001/submissions/99999",
+     "context_name": "Context name 2"
+    },
+    {
+     "course_id": 10000,
+     "plannable_type": "assignment",
+     "submissions": {
+      "submitted": true,
+      "excused": false,
+      "graded": false,
+      "posted_at": "2026-09-04T14:06:03Z",
+      "late": false,
+      "missing": false
+     },
+     "plannable_date": "2026-11-06T15:00:00Z",
+     "plannable": {
+      "id": 10002,
+      "title": "Title 3",
+      "points_possible": 1.0,
+      "due_at": "2026-11-06T15:00:00Z"
+     },
+     "html_url": "/courses/10000/assignments/10002/submissions/99999",
+     "context_name": "Context name 2"
+    }
+   ]
+  },
+  {
+   "method": "GET",
+   "url": "https://canvas.test/api/v1/users/self/missing_submissions?per_page=100&include%5B%5D=course",
+   "status": 200,
+   "link": "<https://canvas.test/api/v1/users/self/missing_submissions?include%5B%5D=course&page=1&per_page=100>; rel=\"current\",<https://canvas.test/api/v1/users/self/missing_submissions?include%5B%5D=course&page=1&per_page=100>; rel=\"first\",<https://canvas.test/api/v1/users/self/missing_submissions?include%5B%5D=course&page=1&per_page=100>; rel=\"last\"",
+   "json": [
+    {
+     "id": 10003,
+     "description": "<link><p>x x x x x x x x x x x x x x x x x x x x x x x x x x:</p>\n<ul>\n<li>x x x x x x x x x-x x x x x x x x x0.0 x x x x x.</li>\n<li>x x x x x x'x x x x x x x, x x x x x x-x x x x x.</li>\n<li><span>x x x x x x x x x x </span>x<span> x x x x x.</span></li>\n<li><span>x x x x x </span>x<span> x x x x x 'x' x x 'x'</span></li>\n<li><span>x x x 0 x (x&nbsp;</span>x) x x x x x x x x x x x x x x x x x x x x<br><br><em>x x x x, x x x<br><span>(x x x x x x x x x x x x x)</span></em><em></em></li>\n</ul>\n<p><em><img></em></p>\n<p><img></p>\n<p><img></p>",
+     "points_possible": 1.0,
+     "due_at": "2026-09-03T16:00:00Z",
+     "course_id": 10000,
+     "name": "Name 4",
+     "html_url": "https://canvas.test/courses/10000/assignments/10003",
+     "course": {
+      "id": 10000,
+      "name": "Context name 2",
+      "start_at": null,
+      "end_at": null,
+      "restrict_enrollments_to_course_dates": false
+     }
+    }
+   ]
+  }
+ ]
+}
