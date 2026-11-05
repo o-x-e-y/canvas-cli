@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from canvas_cli.api import get, get_all, local_date, pages
-from canvas_cli.courses import resolve
+from canvas_cli.courses import print_courses, resolve
 
 
 def outcome_results(course_url):
@@ -38,7 +38,9 @@ def fmt(score):
 
 
 def run(args):
-    course_url = resolve(args.course, "outcomes").url
+    course = resolve(args.course, "outcomes")
+    print_courses([course.label])
+    course_url = course.url
     results, outcomes, assignments = outcome_results(course_url)
     scores = rollup_scores(course_url)
     titles = {i: outcome["title"].strip() for i, outcome in outcomes.items()}
@@ -64,7 +66,10 @@ def run(args):
         if not criteria and submission["submitted_at"] and not submission["grade"]:
             no_outcomes.append(assignment)
 
-    for outcome_id in sorted(by_outcome.keys() | claims.keys(), key=titles.get):
+    shown = by_outcome.keys() | claims.keys()
+    if not shown and not no_outcomes:
+        print("No learning outcomes assessed yet, and no rubric claims one.")
+    for outcome_id in sorted(shown, key=titles.get):
         outcome = outcomes.get(outcome_id)
         score = scores.get(outcome_id)
         if not by_outcome[outcome_id]:

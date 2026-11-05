@@ -73,6 +73,7 @@ def test_standing_with_assessed_unrated_and_claimed_work(canvas, capsys):
     run("outcomes")
 
     assert capsys.readouterr().out == (
+        "Course: personal (Jane Doe personal course)\n\n"
         "Analysis-S2: 3/4 Proficient mastery\n"
         "                ?  Tests (not handed in)\n"
         "  2026-10-08    -  Plan\n"
@@ -82,4 +83,21 @@ def test_standing_with_assessed_unrated_and_claimed_work(canvas, capsys):
         "\n"
         "Handed in, not assessed, and no outcomes in the rubric:\n"
         "  2026-10-21  Notes\n"
+    )
+
+
+def test_says_so_when_there_is_nothing_to_show(canvas, capsys):
+    canvas.get(COURSE, json=PERSONAL)
+    canvas.get(
+        f"{COURSE}/outcome_results",
+        json={"outcome_results": [], "linked": {"outcomes": [], "alignments": []}},
+    )
+    canvas.get(f"{COURSE}/outcome_rollups", json={"rollups": []})
+    canvas.get(f"{COURSE}/assignments", json=[])
+
+    run("outcomes")
+
+    assert capsys.readouterr().out == (
+        "Course: personal (Jane Doe personal course)\n\n"
+        "No learning outcomes assessed yet, and no rubric claims one.\n"
     )

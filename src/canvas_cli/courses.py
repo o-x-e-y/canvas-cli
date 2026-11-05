@@ -17,9 +17,27 @@ class Course:
     def url(self):
         return f"/courses/{self.id}"
 
+    @property
+    def label(self):
+        return label(self.id, self.name)
+
 
 def configured():
     return settings().get("courses", {})
+
+
+def nicknames():
+    return {entry["id"]: name for name, entry in configured().items()}
+
+
+def label(course_id, name):
+    nickname = nicknames().get(course_id)
+    return f"{nickname} ({name})" if nickname else name
+
+
+def print_courses(labels):
+    """The first lines of a command's output: which courses it looked at."""
+    print(f"{'Course' if len(labels) == 1 else 'Courses'}: {', '.join(labels)}\n")
 
 
 def end(course):
@@ -75,12 +93,11 @@ def resolve(wanted, command):
         # Course names repeat every semester, so take the newest term
         course = max(matches, key=lambda c: (c.get("term") or {}).get("start_at") or "")
 
-    nickname = next((n for n, e in configured().items() if e["id"] == course["id"]), None)
+    nickname = nicknames().get(course["id"])
     entry = configured().get(nickname, {})
     if ended(course):
-        label = f"{nickname} ({course['name']})" if nickname else course["name"]
         print(
-            f"Warning: {label} ended on {local_date(end(course))}. If a new semester has "
+            f"Warning: {label(course['id'], course['name'])} ended on {local_date(end(course))}. If a new semester has "
             "started, point the nickname at its course; `canvas courses` lists them.",
             file=sys.stderr,
         )
@@ -104,7 +121,7 @@ def roles(course):
 
 def run(args):
     courses = active_courses()
-    nicknames = {entry["id"]: name for name, entry in configured().items()}
+    names = nicknames()
     rows = []
     for course in sorted(courses, key=lambda c: (ended(c), c["name"])):
         term = (course.get("term") or {}).get("name") or ""
@@ -113,7 +130,7 @@ def run(args):
             term += f", {'ended' if ended(course) else 'ends'} {local_date(end_at)}"
         rows.append(
             (
-                nicknames.get(course["id"], ""),
+                names.get(course["id"], ""),
                 str(course["id"]),
                 course["name"],
                 term,
@@ -121,11 +138,13 @@ def run(args):
             )
         )
     active_ids = {course["id"] for course in courses}
-    for course_id, nickname in nicknames.items():
+    for course_id, nickname in names.items():
         if course_id not in active_ids:
             rows.append((nickname, str(course_id), "(not one of your active courses)", "", ""))
 
-    widths = [max(len(row[i]) for row in rows) for i in range(4)]
+    if not rows:
+        print("No active courses.")
+    widths = [max((len(row[i]) for row in rows), default=0) for i in range(4)]
     for row in rows:
         cells = [cell.ljust(width) for cell, width in zip(row, widths, strict=False)]
         print("  ".join([*cells, row[4]]).rstrip())
@@ -153,7 +172,10 @@ def target_module(course, modules=None):
 
 def run_modules(args):
     course = resolve(args.course, "modules")
+    print_courses([course.label])
     modules = get_all(f"{course.url}/modules", per_page=100, **{"include[]": "items"})
+    if not modules:
+        print("No modules.")
     target = target_module(course, modules) if modules else None
     for module in modules:
         mark = "  (new assignments go here)" if target and module["id"] == target["id"] else ""

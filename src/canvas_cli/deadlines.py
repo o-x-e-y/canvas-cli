@@ -3,7 +3,7 @@ from itertools import groupby
 from operator import itemgetter
 
 from canvas_cli.api import get_all, local
-from canvas_cli.courses import resolve
+from canvas_cli.courses import print_courses, resolve
 
 KINDS = {"assignment": "", "quiz": "quiz", "discussion_topic": "discussion"}
 
@@ -65,6 +65,9 @@ def run(args):
     course = resolve(args.course, "deadlines") if args.course else None
     if course:
         params["context_codes[]"] = f"course_{course.id}"
+        print_courses([course.label])
+    else:
+        print("Courses: all you're enrolled in\n")
     items = sorted(get_all("/planner/items", **params), key=lambda i: i["plannable_date"])
     stale = stale_submissions(items)
 

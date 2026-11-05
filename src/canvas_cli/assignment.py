@@ -177,7 +177,7 @@ def run_delete(args):
         assignment = find_assignment(course, wanted)
         if not assignment:
             raise Error(f'{course.name} has no assignment named "{wanted}".')
-    label = f'"{assignment["name"]}" (id: {assignment["id"]}) from {course.name}'
+    label = f'"{assignment["name"]}" (id: {assignment["id"]}) from {course.label}'
     if not args.yes:
         if not sys.stdin.isatty():
             raise Error(f"Pass --yes to delete {label} without asking.")
@@ -206,7 +206,7 @@ def run_hand_in(args):
         types = ", ".join(assignment["submission_types"])
         raise Error(f'"{args.name}" takes {types}, not {SUBMISSION_TYPES[kind]}.')
 
-    print(f"Handing in to {course.name}: {args.name}")
+    print(f"Handing in to {course.label}: {args.name}")
     submit(course, assignment["id"], docs, args.url, args.text)
     print("Submitted!")
 
@@ -226,7 +226,7 @@ def run(args):
 
     assignment = find_assignment(course, args.name)
     if assignment:
-        print(f"Found existing assignment: {args.name} (id: {assignment['id']})")
+        print(f"Found existing assignment in {course.label}: {args.name} (id: {assignment['id']})")
         if args.desc and args.desc != assignment["description"]:
             with step("updating the description"):
                 put(
@@ -235,7 +235,7 @@ def run(args):
                 )
             print("Description updated.")
     else:
-        print(f"Creating assignment: {args.name}")
+        print(f"Creating assignment in {course.label}: {args.name}")
         assignment = post(
             f"{course.url}/assignments",
             {

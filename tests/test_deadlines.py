@@ -49,6 +49,7 @@ def test_due_items_by_local_day_and_missing_first(canvas, capsys, monkeypatch):
     run("deadlines")
 
     assert capsys.readouterr().out == (
+        "Courses: all you're enrolled in\n\n"
         "Past due and missing\n"
         "  Thu 03 Sep 18:00  CMK: Cut-the-Crêpe\n"
         "\n"
@@ -108,5 +109,6 @@ def test_a_submission_from_before_the_assignment_changed_does_not_count(
     run("deadlines")
 
     assert capsys.readouterr().out == (
+        "Courses: all you're enrolled in\n\n"
         "Fri 06 Nov\n  16:00  CMK: Retrospective\n  16:00  CMK: Pitch  (submitted)\n"
     )

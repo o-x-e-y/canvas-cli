@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 from html.parser import HTMLParser
 
 from canvas_cli.api import get_all, local
-from canvas_cli.courses import current_courses, resolve
+from canvas_cli.courses import current_courses, label, print_courses, resolve
 
 PARAGRAPHS = {"p", "div", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "table", "blockquote"}
 LINES = {"br": "\n", "tr": "\n", "li": "\n- "}
@@ -37,12 +37,14 @@ def text(html):
 def run(args):
     if args.course:
         course = resolve(args.course, "announcements")
-        names = {f"course_{course.id}": course.name}
+        courses = [{"id": course.id, "name": course.name}]
     else:
-        names = {f"course_{c['id']}": c["name"] for c in current_courses()}
-    if not names:
+        courses = current_courses()
+    if not courses:
         print("No running courses.")
         return
+    print_courses([label(c["id"], c["name"]) for c in courses])
+    names = {f"course_{c['id']}": c["name"] for c in courses}
 
     since = datetime.now(UTC) - timedelta(days=args.days)
     posts = get_all(
