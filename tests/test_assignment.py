@@ -153,6 +153,7 @@ def test_after_an_unknown_header_lists_the_headers(personal):
 
 
 def test_rubric_criteria_come_from_the_outcome(personal):
+    personal.get(f"{COURSE}/rubrics", json=[])
     personal.get(f"{COURSE}/outcome_group_links", json=OUTCOMES)
     personal.get(f"{COURSE}/assignments", json=[assignment(11, "Plan")])
     in_module(personal, [{}])
@@ -174,6 +175,7 @@ def test_rubric_criteria_come_from_the_outcome(personal):
 
 
 def test_same_outcome_in_two_groups_is_not_ambiguous(personal):
+    personal.get(f"{COURSE}/rubrics", json=[])
     personal.get(f"{COURSE}/outcome_group_links", json=OUTCOMES + OUTCOMES)
     personal.get(f"{COURSE}/assignments", json=[assignment(11, "Plan")])
     in_module(personal, [{}])
@@ -186,6 +188,7 @@ def test_same_outcome_in_two_groups_is_not_ambiguous(personal):
 
 def test_repeated_titles_need_the_id(personal):
     other = {**ANALYSIS, "id": 502}
+    personal.get(f"{COURSE}/rubrics", json=[])
     personal.get(f"{COURSE}/outcome_group_links", json=[*OUTCOMES, {"outcome": other}])
 
     with pytest.raises(SystemExit, match=r"Analysis-S2 matches 2 outcomes \(ids: 501, 502\)"):
@@ -200,6 +203,7 @@ def test_repeated_titles_need_the_id(personal):
 
 
 def test_existing_rubric_is_left_alone(personal, capsys):
+    personal.get(f"{COURSE}/rubrics", json=[])
     personal.get(f"{COURSE}/outcome_group_links", json=OUTCOMES)
     personal.get(f"{COURSE}/assignments", json=[assignment(11, "Plan", rubric=[{}])])
     in_module(personal, [{}])
@@ -211,6 +215,7 @@ def test_existing_rubric_is_left_alone(personal, capsys):
 
 
 def test_unknown_outcome_stops_before_anything_is_created(personal):
+    personal.get(f"{COURSE}/rubrics", json=[])
     personal.get(f"{COURSE}/outcome_group_links", json=OUTCOMES)
 
     with pytest.raises(SystemExit, match="Unknown outcome.*Design-S9 is not an outcome"):
@@ -398,3 +403,23 @@ def test_form_fills_the_assignment(personal, monkeypatch, tmp_path):
     assert created["name"] == "Plan"
     assert created["description"] == "<p>One.</p>\n\n<p>Two.</p>"
     assert calls(personal, "POST", f"{COURSE}/assignments/11/submissions")
+
+
+def test_rubric_by_title_attaches_the_course_rubric(personal, capsys):
+    personal.get(f"{COURSE}/rubrics", json=[{"id": 90, "title": "Some Rubric"}])
+    personal.get(f"{COURSE}/assignments", json=[assignment(11, "Plan")])
+    in_module(personal, [{}])
+    personal.post(f"{API}/courses/7/rubric_associations", json={})
+
+    run("assignment", "--name", "Plan", "--rubric", "Some Rubric")
+
+    association = body(calls(personal, "POST", f"{COURSE}/rubric_associations")[0])
+    assert association["rubric_association"] == {
+        "rubric_id": 90,
+        "association_type": "Assignment",
+        "association_id": 11,
+        "purpose": "grading",
+        "use_for_grading": False,
+    }
+    assert not calls(personal, "POST", f"{COURSE}/rubrics")
+    assert "Attaching rubric: Some Rubric" in capsys.readouterr().out

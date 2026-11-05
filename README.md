@@ -2,7 +2,7 @@
 
 A command-line tool for a student's own work on Canvas LMS: create assignments
 as proof of work in a course you teach (such as a personal course), attach
-rubrics linked to learning outcomes, hand documents in, and keep track of your
+rubrics, hand documents in, and keep track of your
 standing per outcome, deadlines, announcements and new feedback.
 
 | command | |
@@ -52,8 +52,10 @@ so and passes on its message.
 - When a semester starts, `canvas courses` shows the new course ids, and
   commands warn when a nickname points at a course that has ended.
 
-Rubrics are built from the learning outcomes linked in the course, by title or
-id, so the outcomes have to be imported into the course first.
+`--rubric` takes the title of a rubric the course already has, which is
+attached as it is, or a list of the course's learning outcomes by title or id,
+which becomes a new rubric with one criterion per outcome. Outcomes have to be
+imported into the course first.
 
 ## Install
 

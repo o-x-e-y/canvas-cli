@@ -79,7 +79,10 @@ def rubric_criteria(course, wanted):
         else:
             problems.append(f"{title} is not an outcome in {course.name}")
     if problems:
-        raise Error("Unknown outcome(s): " + "; ".join(problems))
+        raise Error(
+            "Unknown outcome(s): " + "; ".join(problems) + ". --rubric also takes the title of "
+            "one of the course's rubrics."
+        )
 
     criteria = {}
     for i, outcome in enumerate(chosen):
@@ -92,6 +95,13 @@ def rubric_criteria(course, wanted):
             "ratings": {str(j): r for j, r in enumerate(outcome["ratings"])},
         }
     return criteria
+
+
+def existing_rubric(course, title):
+    for rubric in get_all(f"{course.url}/rubrics", per_page=100):
+        if rubric["title"].strip() == title:
+            return rubric
+    return None
 
 
 def find_assignment(course, name):
@@ -208,9 +218,11 @@ def run(args):
     publish = args.publish or bool(docs)
     course = resolve(args.course, "assignment")
 
-    criteria = None
+    rubric = criteria = None
     if args.rubric:
-        criteria = rubric_criteria(course, [title.strip() for title in args.rubric.split(",")])
+        rubric = existing_rubric(course, args.rubric.strip())
+        if not rubric:
+            criteria = rubric_criteria(course, [title.strip() for title in args.rubric.split(",")])
 
     assignment = find_assignment(course, args.name)
     if assignment:
@@ -258,8 +270,22 @@ def run(args):
             post(f"{course.url}/modules/{module['id']}/items", {"module_item": item})
             print("Added to module.")
 
-    if criteria and assignment.get("rubric"):
+    association = {
+        "association_type": "Assignment",
+        "association_id": assignment_id,
+        "purpose": "grading",
+        "use_for_grading": False,
+    }
+    if (rubric or criteria) and assignment.get("rubric"):
         print("The assignment already has a rubric; leaving it as is.")
+    elif rubric:
+        print(f"Attaching rubric: {rubric['title']}")
+        with step("attaching the rubric"):
+            post(
+                f"{course.url}/rubric_associations",
+                {"rubric_association": {"rubric_id": rubric["id"], **association}},
+            )
+        print("Rubric attached.")
     elif criteria:
         print(f"Adding rubric: {args.rubric}")
         with step("adding the rubric"):
@@ -267,12 +293,7 @@ def run(args):
                 f"{course.url}/rubrics",
                 {
                     "rubric": {"title": args.name, "criteria": criteria},
-                    "rubric_association": {
-                        "association_type": "Assignment",
-                        "association_id": assignment_id,
-                        "purpose": "grading",
-                        "use_for_grading": False,
-                    },
+                    "rubric_association": association,
                 },
             )
         print("Rubric added.")

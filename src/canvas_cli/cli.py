@@ -40,7 +40,8 @@ def parser():
     create.add_argument("--desc", default="", help="description, as HTML")
     create.add_argument(
         "--rubric",
-        help="comma-separated learning outcomes by title or id, e.g. Analysis-S2,PL-1",
+        help="the title of one of the course's rubrics, or comma-separated learning outcomes "
+        "by title or id, one criterion each, e.g. Analysis-S2,PL-1",
     )
     create.add_argument(
         "--doc",
