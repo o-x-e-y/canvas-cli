@@ -119,11 +119,26 @@ def parser():
         help="what is due soon, and what is past due and missing",
         description="List what is due in the coming days across your courses, or only the "
         "one -c names, with whether you handed it in, and the assignments that are past due "
-        "and missing.",
+        "and missing. A hand-in, or a mark from `canvas done`, stops counting when the "
+        "assignment is edited after it and before its due date: that is how a teacher reuses "
+        "an assignment for the next sprint.",
     )
     add_course(due, COURSE_HELP)
     due.add_argument("--days", type=int, default=14, help="how far ahead to look (default 14)")
     due.set_defaults(run=deadlines.run)
+
+    done = commands.add_parser(
+        "done",
+        help="mark an assignment done in your Canvas planner",
+        description="Mark an assignment done in your own Canvas planner, the To Do checkbox "
+        "on the website, so `canvas deadlines` counts it as handed in. For a hand-in that "
+        "stopped counting because the teacher only fixed a typo. Nothing is submitted and "
+        "the teacher sees nothing. Looks in every course that is still running, or only the "
+        "one -c names.",
+    )
+    add_course(done, COURSE_HELP)
+    done.add_argument("assignment", help="the assignment's exact name, or its id")
+    done.set_defaults(run=deadlines.run_done)
 
     posts = commands.add_parser(
         "announcements",

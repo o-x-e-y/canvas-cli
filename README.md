@@ -12,7 +12,8 @@ standing per outcome, deadlines, announcements and new feedback.
 | `canvas delete <id or name> [--yes]` | delete an assignment; asks first |
 | `canvas outcomes` | the current score on each learning outcome, the assessed work behind it, and work that claims an outcome but is not assessed yet |
 | `canvas feedback [--notify]` | comments and assessments on your submissions that are new since the last run |
-| `canvas deadlines [--days N]` | what is due soon, and what is past due and missing |
+| `canvas deadlines [--days N]` | what is due soon, and what is past due and missing; a hand-in from before the assignment was last edited, ahead of its due date, doesn't count |
+| `canvas done <id or name>` | mark an assignment done in your Canvas planner, so `deadlines` counts it as handed in |
 | `canvas announcements [--days N] [--unread]` | recent announcements as text |
 | `canvas courses` | your active courses with ids, terms, roles and nicknames |
 | `canvas modules` | a course's modules and items, and where new assignments go |
@@ -20,8 +21,8 @@ standing per outcome, deadlines, announcements and new feedback.
 Every command but `courses` takes `-c COURSE`, before or after the
 subcommand: a nickname from the settings, a course id, or the course's full
 name (a name that repeats across semesters means the newest). Without `-c` a
-command uses its default from the settings; `feedback`, `deadlines` and
-`announcements` cover every running course instead.
+command uses its default from the settings; `feedback`, `deadlines`,
+`done` and `announcements` cover every running course instead.
 
 What you may do in a course is up to Canvas: when it refuses, the error says
 so and passes on its message.
