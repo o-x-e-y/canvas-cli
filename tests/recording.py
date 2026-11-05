@@ -49,7 +49,7 @@ FIELDS = {
     *("restrict_enrollments_to_course_dates", "rollups", "rubric", "rubric_assessment"),
     *("score", "scores", "start_at", "submission", "submission_comments", "submissions"),
     *("submitted", "submitted_at", "submitted_or_assessed_at", "term", "title", "type"),
-    "user_name",
+    *("updated_at", "user_name"),
 }
 # Objects keyed by data rather than by field name
 KEYED_BY_ID = {"rubric_assessment"}
