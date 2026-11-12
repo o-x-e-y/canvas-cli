@@ -79,7 +79,7 @@ def test_courses_lists_nicknames_terms_and_roles(canvas, capsys):
 
 def test_modules_marks_where_new_assignments_go(canvas, capsys):
     canvas.get(COURSE, json=PERSONAL)
-    item = {"indent": 1, "title": "Plan", "type": "Assignment", "position": 2}
+    item = {"indent": 1, "title": "Plan", "type": "Assignment", "position": 2, "content_id": 11}
     header = {"indent": 0, "title": "Group", "type": "SubHeader", "position": 1}
     canvas.get(
         f"{COURSE}/modules",
@@ -93,7 +93,7 @@ def test_modules_marks_where_new_assignments_go(canvas, capsys):
 
     assert capsys.readouterr().out == (
         "Course: personal (Jane Doe personal course)\n\n"
-        "70  Semester 3  (new assignments go here)\n  Group\n    Plan\n71  Old\n"
+        "70  Semester 3  (new assignments go here)\n  Group\n    Plan  (11)\n71  Old\n"
     )
 
 

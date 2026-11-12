@@ -57,7 +57,8 @@
        "title": "Title 4",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10003"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10003",
+       "content_id": 20000
       },
       {
        "id": 10004,
@@ -70,42 +71,48 @@
        "title": "Title 6",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10005"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10005",
+       "content_id": 20001
       },
       {
        "id": 10006,
        "title": "Title 7",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10006"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10006",
+       "content_id": 20002
       },
       {
        "id": 10007,
        "title": "Title 8",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10007"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10007",
+       "content_id": 20003
       },
       {
        "id": 10008,
        "title": "Title 9",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10008"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10008",
+       "content_id": 20004
       },
       {
        "id": 10009,
        "title": "Title 10",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10009"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10009",
+       "content_id": 20005
       },
       {
        "id": 10010,
        "title": "Title 11",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10010"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10010",
+       "content_id": 20006
       }
      ]
     },
@@ -125,7 +132,8 @@
        "title": "Title 14",
        "indent": 0,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10013"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10013",
+       "content_id": 20007
       },
       {
        "id": 10014,
@@ -157,35 +165,40 @@
        "title": "Title 19",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10018"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10018",
+       "content_id": 20008
       },
       {
        "id": 10019,
        "title": "Title 20",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10019"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10019",
+       "content_id": 20009
       },
       {
        "id": 10020,
        "title": "Title 21",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10020"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10020",
+       "content_id": 20010
       },
       {
        "id": 10021,
        "title": "Title 22",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10021"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10021",
+       "content_id": 20011
       },
       {
        "id": 10022,
        "title": "Title 23",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10022"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10022",
+       "content_id": 20012
       },
       {
        "id": 10023,
@@ -198,42 +211,48 @@
        "title": "Title 25",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10024"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10024",
+       "content_id": 20013
       },
       {
        "id": 10025,
        "title": "Title 26",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10025"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10025",
+       "content_id": 20014
       },
       {
        "id": 10026,
        "title": "Title 27",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10026"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10026",
+       "content_id": 20015
       },
       {
        "id": 10027,
        "title": "Title 28",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10027"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10027",
+       "content_id": 20016
       },
       {
        "id": 10028,
        "title": "Title 29",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10028"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10028",
+       "content_id": 20017
       },
       {
        "id": 10029,
        "title": "Title 30",
        "indent": 1,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10029"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10029",
+       "content_id": 20018
       }
      ]
     },
@@ -246,42 +265,48 @@
        "title": "Title 32",
        "indent": 0,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10031"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10031",
+       "content_id": 20019
       },
       {
        "id": 10032,
        "title": "Title 33",
        "indent": 0,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10032"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10032",
+       "content_id": 20020
       },
       {
        "id": 10033,
        "title": "Title 34",
        "indent": 0,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10033"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10033",
+       "content_id": 20021
       },
       {
        "id": 10034,
        "title": "Title 35",
        "indent": 0,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10034"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10034",
+       "content_id": 20022
       },
       {
        "id": 10035,
        "title": "Title 36",
        "indent": 0,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10035"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10035",
+       "content_id": 20023
       },
       {
        "id": 10036,
        "title": "Title 37",
        "indent": 0,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10036"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10036",
+       "content_id": 20024
       }
      ]
     },
@@ -294,49 +319,56 @@
        "title": "Title 39",
        "indent": 0,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10038"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10038",
+       "content_id": 20025
       },
       {
        "id": 10039,
        "title": "Title 40",
        "indent": 0,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10039"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10039",
+       "content_id": 20026
       },
       {
        "id": 10040,
        "title": "Title 41",
        "indent": 0,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10040"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10040",
+       "content_id": 20027
       },
       {
        "id": 10041,
        "title": "Title 42",
        "indent": 0,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10041"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10041",
+       "content_id": 20028
       },
       {
        "id": 10042,
        "title": "Title 43",
        "indent": 0,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10042"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10042",
+       "content_id": 20029
       },
       {
        "id": 10043,
        "title": "Title 44",
        "indent": 0,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10043"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10043",
+       "content_id": 20030
       },
       {
        "id": 10044,
        "title": "Title 45",
        "indent": 0,
        "type": "Assignment",
-       "html_url": "https://canvas.test/courses/10000/modules/items/10044"
+       "html_url": "https://canvas.test/courses/10000/modules/items/10044",
+       "content_id": 20031
       }
      ]
     },

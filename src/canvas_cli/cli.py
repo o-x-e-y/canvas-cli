@@ -195,7 +195,8 @@ def parser():
         "modules",
         help="a course's modules and their items",
         description="List a course's modules with their ids and items, indented as on "
-        "Canvas, and mark the one new assignments go into.",
+        "Canvas, with each assignment's id for hand-in --id, and mark the one new "
+        "assignments go into.",
     )
     add_course(modules, COURSE_HELP)
     modules.set_defaults(run=courses.run_modules)

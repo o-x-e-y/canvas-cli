@@ -181,4 +181,5 @@ def run_modules(args):
         mark = "  (new assignments go here)" if target and module["id"] == target["id"] else ""
         print(f"{module['id']}  {module['name']}{mark}")
         for item in module_items(course, module):
-            print(f"  {'  ' * item['indent']}{item['title']}")
+            id = f"  ({item['content_id']})" if item["type"] == "Assignment" else ""
+            print(f"  {'  ' * item['indent']}{item['title']}{id}")

@@ -39,7 +39,7 @@ SCENARIOS = {
 }
 
 FIELDS = {
-    *("alignments", "assignment", "author_id", "author_name", "comment", "comments"),
+    *("alignments", "assignment", "author_id", "author_name", "comment", "comments", "content_id"),
     *("context_code", "context_name", "course", "course_id", "deleted_at", "description"),
     *("due_at", "end_at", "enrollments", "excused", "grade", "graded", "graded_at", "hidden"),
     *("html_url", "id", "indent", "items", "late", "learning_outcome", "linked", "links"),
