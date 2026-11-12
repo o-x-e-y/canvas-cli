@@ -1,10 +1,18 @@
 import json
+from datetime import datetime
 
 import pytest
 from conftest import AMSTERDAM, API, GENERAL, calls, run, timezone
+from recording import freeze
 
 DUE = "2026-11-06T15:00:00Z"
 PAST = "2026-09-03T16:00:00Z"
+
+
+@pytest.fixture(autouse=True)
+def before_due():
+    with freeze(datetime.fromisoformat("2026-11-05T12:00:00Z")):
+        yield
 
 
 def planned(id, title, submitted=True):
