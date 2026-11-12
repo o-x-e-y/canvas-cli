@@ -153,6 +153,30 @@ def parser():
     )
     posts.set_defaults(run=announcements.run)
 
+    mark = commands.add_parser(
+        "mark-read",
+        help="mark announcements as read on Canvas",
+        description="Mark announcements as read on Canvas, so `canvas announcements --unread` "
+        "no longer lists them: the ones whose URLs are given, as `canvas announcements` "
+        "prints them, or with --all every unread one of the past days in every course that "
+        "is still running, or only the one -c names.",
+    )
+    add_course(mark, COURSE_HELP)
+    mark.add_argument("urls", nargs="*", metavar="URL", help="an announcement's URL")
+    mark.add_argument("--all", action="store_true", help="every unread announcement")
+    mark.add_argument(
+        "--days", type=int, default=14, help="with --all, how far back to look (default 14)"
+    )
+    mark.add_argument(
+        "--min-age",
+        type=float,
+        default=3,
+        metavar="MINUTES",
+        help="with --all, leave announcements posted in the past minutes unread, since you "
+        "probably haven't seen them yet (default 3)",
+    )
+    mark.set_defaults(run=announcements.run_mark_read)
+
     listing = commands.add_parser(
         "courses",
         help="your active courses, with ids, terms, roles and nicknames",

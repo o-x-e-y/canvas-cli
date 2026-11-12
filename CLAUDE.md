@@ -16,7 +16,7 @@ change their text there when a subcommand, flag or output changes.
 | `outcomes.py` | `outcomes`: outcome rollups, results, and unassessed rubric claims |
 | `feedback.py` | `feedback`: new comments and assessments, state in `$XDG_STATE_HOME/canvas-feedback.json` |
 | `deadlines.py` | `deadlines`: planner items and missing submissions, and which hand-ins still count; `done` |
-| `announcements.py` | `announcements`: recent announcements, HTML to text |
+| `announcements.py` | `announcements`: recent announcements, HTML to text; `mark-read` |
 | `nix/hm-module.nix` | writes `~/.config/canvas/settings.json` and the feedback timer |
 
 ## Working on it

@@ -15,6 +15,7 @@ standing per outcome, deadlines, announcements and new feedback.
 | `canvas deadlines [--days N]` | what is due soon, and what is past due and missing; a hand-in from before the assignment was last edited, ahead of its due date, doesn't count |
 | `canvas done <id or name>` | mark an assignment done in your Canvas planner, so `deadlines` counts it as handed in |
 | `canvas announcements [--days N] [--unread]` | recent announcements as text |
+| `canvas mark-read (<url>... \| --all [--days N] [--min-age MINUTES])` | mark announcements as read on Canvas: the ones with those URLs, or every unread one older than a few minutes |
 | `canvas courses` | your active courses with ids, terms, roles and nicknames |
 | `canvas modules` | a course's modules and items, and where new assignments go |
 
@@ -22,7 +23,7 @@ Every command but `courses` takes `-c COURSE`, before or after the
 subcommand: a nickname from the settings, a course id, or the course's full
 name (a name that repeats across semesters means the newest). Without `-c` a
 command uses its default from the settings; `feedback`, `deadlines`,
-`done` and `announcements` cover every running course instead.
+`done`, `announcements` and `mark-read` cover every running course instead.
 
 What you may do in a course is up to Canvas: when it refuses, the error says
 so and passes on its message.
