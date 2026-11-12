@@ -15,8 +15,8 @@ change their text there when a subcommand, flag or output changes.
 | `assignment.py` | `assignment` (create or continue, rubric, module, publish, submit), `hand-in`, `delete` |
 | `outcomes.py` | `outcomes`: outcome rollups, results, and unassessed rubric claims |
 | `feedback.py` | `feedback`: new comments and assessments, state in `$XDG_STATE_HOME/canvas-feedback.json` |
-| `deadlines.py` | `deadlines`: planner items and missing submissions |
-| `announcements.py` | `announcements`: recent announcements, HTML to text |
+| `deadlines.py` | `deadlines`: planner items and missing submissions, and which hand-ins still count; `done` |
+| `announcements.py` | `announcements`: recent announcements, HTML to text; `mark-read` |
 | `nix/hm-module.nix` | writes `~/.config/canvas/settings.json` and the feedback timer |
 
 ## Working on it
@@ -40,6 +40,11 @@ Canvas traps the code already handles:
 - An unrated rubric criterion keeps a `rating_id` but has no `points`, so a
   rating is only real when `points` is set.
 - Course names repeat every semester; pick by the newest term.
+- A teacher reuses an assignment by moving its due date forward, and Canvas
+  keeps the old hand-in as submitted. The old due date is gone: even
+  `cached_due_date` in the submission history is rewritten. The only trace is
+  `updated_at`, so a hand-in or planner mark made before an edit that came
+  before the due date doesn't count.
 - Canvas answers 401 both for a bad token and for an action your role can't
   do; only the message tells them apart. The tool never decides what a role
   may do: it tries, and passes Canvas's refusal on.

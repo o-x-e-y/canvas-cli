@@ -336,6 +336,26 @@ def test_hand_in_checks_the_submission_type(canvas, tmp_path):
         run("hand-in", "-c", "CMK", "--name", "Quiz", "--doc", str(pdf(tmp_path)))
 
 
+def test_hand_in_by_id_fetches_that_assignment(canvas, tmp_path, capsys):
+    course = newest_cmk(canvas)
+    canvas.get(f"{course}/assignments/54321", json=assignment(54321, "Study plan"))
+    uploads(canvas, course, 54321, [99])
+
+    run("hand-in", "-c", "CMK", "--id", "54321", "--doc", str(pdf(tmp_path)))
+
+    assert calls(canvas, "POST", f"{course}/assignments/54321/submissions")
+    assert "Handing in to CMK: Study plan\n" in capsys.readouterr().out
+
+
+def test_hand_in_by_an_unknown_id(canvas, tmp_path):
+    course = newest_cmk(canvas)
+    canvas.get(f"{course}/assignments/404", status=404, json={"errors": [{"message": "x"}]})
+
+    with pytest.raises(SystemExit, match="CMK has no assignment with id 404"):
+        run("hand-in", "-c", "CMK", "--id", "404", "--doc", str(pdf(tmp_path)))
+    assert not calls(canvas, "POST", f"{course}/assignments/404/submissions")
+
+
 def test_hand_in_without_a_default_needs_c(canvas, tmp_path):
     with pytest.raises(SystemExit, match="canvas hand-in needs -c COURSE.*personal, general"):
         run("hand-in", "--name", "Plan", "--doc", str(pdf(tmp_path)))

@@ -39,17 +39,17 @@ SCENARIOS = {
 }
 
 FIELDS = {
-    *("alignments", "assignment", "author_id", "author_name", "comment", "comments"),
-    *("context_code", "context_name", "course", "course_id", "description", "due_at"),
-    *("end_at", "enrollments", "excused", "grade", "graded", "graded_at", "hidden"),
+    *("alignments", "assignment", "author_id", "author_name", "comment", "comments", "content_id"),
+    *("context_code", "context_name", "course", "course_id", "deleted_at", "description"),
+    *("due_at", "end_at", "enrollments", "excused", "grade", "graded", "graded_at", "hidden"),
     *("html_url", "id", "indent", "items", "late", "learning_outcome", "linked", "links"),
-    *("mastery_points", "message", "missing", "name", "outcome", "outcome_id"),
-    *("outcome_results", "outcomes", "plannable", "plannable_date", "plannable_type"),
-    *("points", "points_possible", "posted_at", "rating_id", "ratings", "read_state"),
-    *("restrict_enrollments_to_course_dates", "rollups", "rubric", "rubric_assessment"),
-    *("score", "scores", "start_at", "submission", "submission_comments", "submissions"),
-    *("submitted", "submitted_at", "submitted_or_assessed_at", "term", "title", "type"),
-    "user_name",
+    *("marked_complete", "mastery_points", "message", "missing", "name", "outcome", "outcome_id"),
+    *("outcome_results", "outcomes", "plannable", "plannable_date", "plannable_id"),
+    *("plannable_type", "points", "points_possible", "posted_at", "rating_id", "ratings"),
+    *("read_state", "restrict_enrollments_to_course_dates", "rollups", "rubric"),
+    *("rubric_assessment", "score", "scores", "start_at", "submission", "submission_comments"),
+    *("submissions", "submitted", "submitted_at", "submitted_or_assessed_at", "term", "title"),
+    *("type", "updated_at", "user_name"),
 }
 # Objects keyed by data rather than by field name
 KEYED_BY_ID = {"rubric_assessment"}

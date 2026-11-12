@@ -1,6 +1,9 @@
+import json
+
 import pytest
 from conftest import API, COURSE, ENDED, GENERAL, PERSONAL, run
 
+from canvas_cli import api
 from canvas_cli.api import Error
 from canvas_cli.courses import resolve
 
@@ -76,7 +79,7 @@ def test_courses_lists_nicknames_terms_and_roles(canvas, capsys):
 
 def test_modules_marks_where_new_assignments_go(canvas, capsys):
     canvas.get(COURSE, json=PERSONAL)
-    item = {"indent": 1, "title": "Plan", "type": "Assignment", "position": 2}
+    item = {"indent": 1, "title": "Plan", "type": "Assignment", "position": 2, "content_id": 11}
     header = {"indent": 0, "title": "Group", "type": "SubHeader", "position": 1}
     canvas.get(
         f"{COURSE}/modules",
@@ -89,5 +92,27 @@ def test_modules_marks_where_new_assignments_go(canvas, capsys):
     run("modules", "-c", "personal")
 
     assert capsys.readouterr().out == (
-        "70  Semester 3  (new assignments go here)\n  Group\n    Plan\n71  Old\n"
+        "Course: personal (Jane Doe personal course)\n\n"
+        "70  Semester 3  (new assignments go here)\n  Group\n    Plan  (11)\n71  Old\n"
     )
+
+
+def test_modules_says_so_when_there_are_none(canvas, capsys):
+    canvas.get(COURSE, json=PERSONAL)
+    canvas.get(f"{COURSE}/modules", json=[])
+
+    run("modules", "-c", "personal")
+
+    assert capsys.readouterr().out == (
+        "Course: personal (Jane Doe personal course)\n\nNo modules.\n"
+    )
+
+
+def test_courses_without_any(canvas, capsys, settings):
+    settings.write_text(json.dumps({"url": "https://canvas.test", "api_key_file": "/dev/null"}))
+    api.settings.cache_clear()
+    canvas.get(f"{API}/courses", json=[])
+
+    run("courses")
+
+    assert capsys.readouterr().out == "No active courses.\n"

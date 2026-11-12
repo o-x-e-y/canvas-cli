@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 
 from canvas_cli.api import get, get_all
-from canvas_cli.courses import current_courses, resolve
+from canvas_cli.courses import current_courses, label, print_courses, resolve
 
 STATE_HOME = os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state")
 STATE_PATH = Path(STATE_HOME, "canvas-feedback.json")
@@ -66,15 +66,21 @@ def run(args):
         courses = [{"id": course.id, "name": course.name}]
     else:
         courses = current_courses(enrollment_type="student")
+    if not courses:
+        # Saving the state now would forget everything seen so far
+        print("No running courses.")
+        return
+    print_courses([label(c["id"], c["name"]) for c in courses])
     seen = set(json.loads(STATE_PATH.read_text())) if STATE_PATH.exists() else None
     items = list(feedback(get("/users/self")["id"], courses))
 
     if seen is None:
         print(f"First run: recorded {len(items)} existing items; later runs report what is new.")
     else:
-        for key, title, body in items:
-            if key in seen:
-                continue
+        new = [(key, title, body) for key, title, body in items if key not in seen]
+        if not new:
+            print("No new feedback.")
+        for _, title, body in new:
             print(f"{title}\n{body}\n")
             if args.notify:
                 subprocess.run(["notify-send", "--app-name=Canvas", title, body], check=False)

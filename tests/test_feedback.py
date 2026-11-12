@@ -49,7 +49,9 @@ def test_first_run_only_records(canvas, state, capsys):
 
     run("feedback")
 
-    assert capsys.readouterr().out.startswith("First run: recorded 1 existing items")
+    assert capsys.readouterr().out.startswith(
+        "Course: general (CMK)\n\nFirst run: recorded 1 existing items"
+    )
     assert json.loads(state.read_text()) == ["comment:1"]
 
 
@@ -73,6 +75,7 @@ def test_reports_new_comments_and_assessments_once(canvas, state, capsys):
     run("feedback")
 
     assert capsys.readouterr().out == (
+        "Course: general (CMK)\n\n"
         "CMK: Plan\nTeacher: New\n\n"
         "CMK: Plan\nAssessed\nGrade: complete\nAnalysis-S2: Proficient (clear)\n\n"
     )
@@ -88,3 +91,23 @@ def test_unrated_criterion_keeps_its_rating_id_but_has_no_points():
         submission(grade=None, rubric_assessment={"c1": {"rating_id": "r2", "points": None}})
     )
     assert text == "Analysis-S2: not rated"
+
+
+def test_says_so_when_nothing_is_new(canvas, state, capsys):
+    state.write_text(json.dumps(["comment:1"]))
+    comment = {"id": 1, "author_id": 2, "author_name": "Teacher", "comment": "Old"}
+    serve(canvas, submission(submission_comments=[comment]))
+
+    run("feedback")
+
+    assert capsys.readouterr().out == "Course: general (CMK)\n\nNo new feedback.\n"
+
+
+def test_no_running_courses_keeps_what_was_seen(canvas, state, capsys):
+    state.write_text(json.dumps(["comment:1"]))
+    canvas.get(f"{API}/courses", json=[ENDED])
+
+    run("feedback")
+
+    assert capsys.readouterr().out == "No running courses.\n"
+    assert json.loads(state.read_text()) == ["comment:1"]

@@ -72,7 +72,13 @@ def parser():
         "that repeats across semesters means the newest one.",
     )
     add_course(hand_in, COURSE_HELP)
-    hand_in.add_argument("--name", required=True, help="the assignment's exact name")
+    which = hand_in.add_mutually_exclusive_group(required=True)
+    which.add_argument("--name", help="the assignment's exact name")
+    which.add_argument(
+        "--id",
+        type=int,
+        help="the assignment's id, the number in its URL; it stays when the name changes",
+    )
     what = hand_in.add_mutually_exclusive_group(required=True)
     what.add_argument(
         "--doc", action="append", help="file to upload and submit; repeat for more files"
@@ -119,11 +125,26 @@ def parser():
         help="what is due soon, and what is past due and missing",
         description="List what is due in the coming days across your courses, or only the "
         "one -c names, with whether you handed it in, and the assignments that are past due "
-        "and missing.",
+        "and missing. A hand-in, or a mark from `canvas done`, stops counting when the "
+        "assignment is edited after it and before its due date: that is how a teacher reuses "
+        "an assignment for the next sprint.",
     )
     add_course(due, COURSE_HELP)
     due.add_argument("--days", type=int, default=14, help="how far ahead to look (default 14)")
     due.set_defaults(run=deadlines.run)
+
+    done = commands.add_parser(
+        "done",
+        help="mark an assignment done in your Canvas planner",
+        description="Mark an assignment done in your own Canvas planner, the To Do checkbox "
+        "on the website, so `canvas deadlines` counts it as handed in. For a hand-in that "
+        "stopped counting because the teacher only fixed a typo. Nothing is submitted and "
+        "the teacher sees nothing. Looks in every course that is still running, or only the "
+        "one -c names.",
+    )
+    add_course(done, COURSE_HELP)
+    done.add_argument("assignment", help="the assignment's exact name, or its id")
+    done.set_defaults(run=deadlines.run_done)
 
     posts = commands.add_parser(
         "announcements",
@@ -138,6 +159,30 @@ def parser():
     )
     posts.set_defaults(run=announcements.run)
 
+    mark = commands.add_parser(
+        "mark-read",
+        help="mark announcements as read on Canvas",
+        description="Mark announcements as read on Canvas, so `canvas announcements --unread` "
+        "no longer lists them: the ones whose URLs are given, as `canvas announcements` "
+        "prints them, or with --all every unread one of the past days in every course that "
+        "is still running, or only the one -c names.",
+    )
+    add_course(mark, COURSE_HELP)
+    mark.add_argument("urls", nargs="*", metavar="URL", help="an announcement's URL")
+    mark.add_argument("--all", action="store_true", help="every unread announcement")
+    mark.add_argument(
+        "--days", type=int, default=14, help="with --all, how far back to look (default 14)"
+    )
+    mark.add_argument(
+        "--min-age",
+        type=float,
+        default=3,
+        metavar="MINUTES",
+        help="with --all, leave announcements posted in the past minutes unread, since you "
+        "probably haven't seen them yet (default 3)",
+    )
+    mark.set_defaults(run=announcements.run_mark_read)
+
     listing = commands.add_parser(
         "courses",
         help="your active courses, with ids, terms, roles and nicknames",
@@ -150,7 +195,8 @@ def parser():
         "modules",
         help="a course's modules and their items",
         description="List a course's modules with their ids and items, indented as on "
-        "Canvas, and mark the one new assignments go into.",
+        "Canvas, with each assignment's id for hand-in --id, and mark the one new "
+        "assignments go into.",
     )
     add_course(modules, COURSE_HELP)
     modules.set_defaults(run=courses.run_modules)

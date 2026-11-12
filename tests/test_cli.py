@@ -22,6 +22,9 @@ def test_help_lists_every_command(capsys):
     [
         ["hand-in", "--course", "CMK", "--name", "x"],
         ["hand-in", "--course", "CMK", "--name", "x", "--doc", "/x", "--publish"],
+        ["hand-in", "--course", "CMK", "--name", "x", "--id", "5", "--doc", "/x"],
+        ["hand-in", "--course", "CMK", "--doc", "/x"],
+        ["hand-in", "--course", "CMK", "--id", "x", "--doc", "/x"],
         ["delete", "12", "--name", "Plan"],
     ],
 )

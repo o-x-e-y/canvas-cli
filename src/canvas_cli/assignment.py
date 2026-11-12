@@ -177,7 +177,7 @@ def run_delete(args):
         assignment = find_assignment(course, wanted)
         if not assignment:
             raise Error(f'{course.name} has no assignment named "{wanted}".')
-    label = f'"{assignment["name"]}" (id: {assignment["id"]}) from {course.name}'
+    label = f'"{assignment["name"]}" (id: {assignment["id"]}) from {course.label}'
     if not args.yes:
         if not sys.stdin.isatty():
             raise Error(f"Pass --yes to delete {label} without asking.")
@@ -195,18 +195,27 @@ SUBMISSION_TYPES = {"doc": "online_upload", "url": "online_url", "text": "online
 def run_hand_in(args):
     docs = files(args.doc or [])
     course = resolve(args.course, "hand-in")
-    assignment = find_assignment(course, args.name)
+    if args.id is not None:
+        try:
+            assignment = get(f"{course.url}/assignments/{args.id}")
+        except Error as error:
+            if not str(error).startswith("Not found"):
+                raise
+            raise Error(f"{course.name} has no assignment with id {args.id}.") from None
+    else:
+        assignment = find_assignment(course, args.name)
     if not assignment:
         names = "\n  ".join(a["name"] for a in get_all(f"{course.url}/assignments", per_page=100))
         raise Error(
             f'{course.name} has no assignment named "{args.name}". Its assignments:\n  {names}'
         )
+    name = assignment["name"]
     kind = "doc" if docs else "url" if args.url else "text"
     if SUBMISSION_TYPES[kind] not in assignment["submission_types"]:
         types = ", ".join(assignment["submission_types"])
-        raise Error(f'"{args.name}" takes {types}, not {SUBMISSION_TYPES[kind]}.')
+        raise Error(f'"{name}" takes {types}, not {SUBMISSION_TYPES[kind]}.')
 
-    print(f"Handing in to {course.name}: {args.name}")
+    print(f"Handing in to {course.label}: {name}")
     submit(course, assignment["id"], docs, args.url, args.text)
     print("Submitted!")
 
@@ -226,7 +235,7 @@ def run(args):
 
     assignment = find_assignment(course, args.name)
     if assignment:
-        print(f"Found existing assignment: {args.name} (id: {assignment['id']})")
+        print(f"Found existing assignment in {course.label}: {args.name} (id: {assignment['id']})")
         if args.desc and args.desc != assignment["description"]:
             with step("updating the description"):
                 put(
@@ -235,7 +244,7 @@ def run(args):
                 )
             print("Description updated.")
     else:
-        print(f"Creating assignment: {args.name}")
+        print(f"Creating assignment in {course.label}: {args.name}")
         assignment = post(
             f"{course.url}/assignments",
             {
