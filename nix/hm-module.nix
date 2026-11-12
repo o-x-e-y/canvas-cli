@@ -13,9 +13,12 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.callPackage ./package.nix { };
-      defaultText = lib.literalMD "this flake's package, built with your `pkgs`";
-      description = "The package to install.";
+      default = pkgs.canvas-cli;
+      defaultText = lib.literalExpression "pkgs.canvas-cli";
+      description = ''
+        The package to install. The default needs this flake's
+        `overlays.default` in `nixpkgs.overlays`.
+      '';
     };
 
     url = lib.mkOption {
