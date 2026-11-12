@@ -8,7 +8,7 @@ standing per outcome, deadlines, announcements and new feedback.
 | command | |
 |---|---|
 | `canvas assignment --name <n> [--desc <html>] [--rubric <rubric or outcomes>] [--doc <file>]... [--publish] [--indent N] [--after <header>]` | create an assignment, or continue the one with that name, and optionally hand files in |
-| `canvas hand-in --name <n> (--doc <file>... \| --url <url> \| --text <html>)` | hand in to an existing assignment |
+| `canvas hand-in (--name <n> \| --id <id>) (--doc <file>... \| --url <url> \| --text <html>)` | hand in to an existing assignment |
 | `canvas delete <id or name> [--yes]` | delete an assignment; asks first |
 | `canvas outcomes` | the current score on each learning outcome, the assessed work behind it, and work that claims an outcome but is not assessed yet |
 | `canvas feedback [--notify]` | comments and assessments on your submissions that are new since the last run |

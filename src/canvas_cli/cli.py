@@ -72,7 +72,13 @@ def parser():
         "that repeats across semesters means the newest one.",
     )
     add_course(hand_in, COURSE_HELP)
-    hand_in.add_argument("--name", required=True, help="the assignment's exact name")
+    which = hand_in.add_mutually_exclusive_group(required=True)
+    which.add_argument("--name", help="the assignment's exact name")
+    which.add_argument(
+        "--id",
+        type=int,
+        help="the assignment's id, the number in its URL; it stays when the name changes",
+    )
     what = hand_in.add_mutually_exclusive_group(required=True)
     what.add_argument(
         "--doc", action="append", help="file to upload and submit; repeat for more files"
